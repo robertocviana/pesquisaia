@@ -1,0 +1,16 @@
+name: pesquisaia
+
+services:
+  appserver:
+    type: php:8.3
+    ssl: true
+    webroot: public
+    xdebug: false
+
+proxy:
+  appserver:
+    - pesquisaia.lndo.site
+
+tooling:
+  php:
+    service: appserver
