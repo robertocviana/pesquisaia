@@ -179,8 +179,9 @@ function notify() { subs.forEach((s) => s()); }
 
 export function subscribe(fn: () => void) {
   subs.add(fn);
-  return () => subs.delete(fn);
+  return () => { subs.delete(fn); };
 }
+
 
 export function listSurveys(): Survey[] {
   return load();
