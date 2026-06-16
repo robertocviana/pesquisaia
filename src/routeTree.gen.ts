@@ -9,38 +9,233 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
+import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PesquisasIndexRouteImport } from './routes/pesquisas.index'
+import { Route as PesquisasNovaRouteImport } from './routes/pesquisas.nova'
+import { Route as RIdIndexRouteImport } from './routes/r.$id.index'
+import { Route as PesquisasIdIndexRouteImport } from './routes/pesquisas.$id.index'
+import { Route as RIdConcluidoRouteImport } from './routes/r.$id.concluido'
+import { Route as RIdChatRouteImport } from './routes/r.$id.chat'
+import { Route as PesquisasIdRevisaoRouteImport } from './routes/pesquisas.$id.revisao'
+import { Route as PesquisasIdRelatorioRouteImport } from './routes/pesquisas.$id.relatorio'
+import { Route as PesquisasIdRespostasIndexRouteImport } from './routes/pesquisas.$id.respostas.index'
+import { Route as PesquisasIdRespostasRidRouteImport } from './routes/pesquisas.$id.respostas.$rid'
 
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PesquisasIndexRoute = PesquisasIndexRouteImport.update({
+  id: '/pesquisas/',
+  path: '/pesquisas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesquisasNovaRoute = PesquisasNovaRouteImport.update({
+  id: '/pesquisas/nova',
+  path: '/pesquisas/nova',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RIdIndexRoute = RIdIndexRouteImport.update({
+  id: '/r/$id/',
+  path: '/r/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesquisasIdIndexRoute = PesquisasIdIndexRouteImport.update({
+  id: '/pesquisas/$id/',
+  path: '/pesquisas/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RIdConcluidoRoute = RIdConcluidoRouteImport.update({
+  id: '/r/$id/concluido',
+  path: '/r/$id/concluido',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RIdChatRoute = RIdChatRouteImport.update({
+  id: '/r/$id/chat',
+  path: '/r/$id/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesquisasIdRevisaoRoute = PesquisasIdRevisaoRouteImport.update({
+  id: '/pesquisas/$id/revisao',
+  path: '/pesquisas/$id/revisao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesquisasIdRelatorioRoute = PesquisasIdRelatorioRouteImport.update({
+  id: '/pesquisas/$id/relatorio',
+  path: '/pesquisas/$id/relatorio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesquisasIdRespostasIndexRoute =
+  PesquisasIdRespostasIndexRouteImport.update({
+    id: '/pesquisas/$id/respostas/',
+    path: '/pesquisas/$id/respostas/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PesquisasIdRespostasRidRoute = PesquisasIdRespostasRidRouteImport.update({
+  id: '/pesquisas/$id/respostas/$rid',
+  path: '/pesquisas/$id/respostas/$rid',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cadastro': typeof CadastroRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/dashboard': typeof DashboardRoute
+  '/pesquisas/nova': typeof PesquisasNovaRoute
+  '/pesquisas/': typeof PesquisasIndexRoute
+  '/pesquisas/$id/relatorio': typeof PesquisasIdRelatorioRoute
+  '/pesquisas/$id/revisao': typeof PesquisasIdRevisaoRoute
+  '/r/$id/chat': typeof RIdChatRoute
+  '/r/$id/concluido': typeof RIdConcluidoRoute
+  '/pesquisas/$id/': typeof PesquisasIdIndexRoute
+  '/r/$id/': typeof RIdIndexRoute
+  '/pesquisas/$id/respostas/$rid': typeof PesquisasIdRespostasRidRoute
+  '/pesquisas/$id/respostas/': typeof PesquisasIdRespostasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cadastro': typeof CadastroRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/dashboard': typeof DashboardRoute
+  '/pesquisas/nova': typeof PesquisasNovaRoute
+  '/pesquisas': typeof PesquisasIndexRoute
+  '/pesquisas/$id/relatorio': typeof PesquisasIdRelatorioRoute
+  '/pesquisas/$id/revisao': typeof PesquisasIdRevisaoRoute
+  '/r/$id/chat': typeof RIdChatRoute
+  '/r/$id/concluido': typeof RIdConcluidoRoute
+  '/pesquisas/$id': typeof PesquisasIdIndexRoute
+  '/r/$id': typeof RIdIndexRoute
+  '/pesquisas/$id/respostas/$rid': typeof PesquisasIdRespostasRidRoute
+  '/pesquisas/$id/respostas': typeof PesquisasIdRespostasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cadastro': typeof CadastroRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/dashboard': typeof DashboardRoute
+  '/pesquisas/nova': typeof PesquisasNovaRoute
+  '/pesquisas/': typeof PesquisasIndexRoute
+  '/pesquisas/$id/relatorio': typeof PesquisasIdRelatorioRoute
+  '/pesquisas/$id/revisao': typeof PesquisasIdRevisaoRoute
+  '/r/$id/chat': typeof RIdChatRoute
+  '/r/$id/concluido': typeof RIdConcluidoRoute
+  '/pesquisas/$id/': typeof PesquisasIdIndexRoute
+  '/r/$id/': typeof RIdIndexRoute
+  '/pesquisas/$id/respostas/$rid': typeof PesquisasIdRespostasRidRoute
+  '/pesquisas/$id/respostas/': typeof PesquisasIdRespostasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/cadastro'
+    | '/configuracoes'
+    | '/dashboard'
+    | '/pesquisas/nova'
+    | '/pesquisas/'
+    | '/pesquisas/$id/relatorio'
+    | '/pesquisas/$id/revisao'
+    | '/r/$id/chat'
+    | '/r/$id/concluido'
+    | '/pesquisas/$id/'
+    | '/r/$id/'
+    | '/pesquisas/$id/respostas/$rid'
+    | '/pesquisas/$id/respostas/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/cadastro'
+    | '/configuracoes'
+    | '/dashboard'
+    | '/pesquisas/nova'
+    | '/pesquisas'
+    | '/pesquisas/$id/relatorio'
+    | '/pesquisas/$id/revisao'
+    | '/r/$id/chat'
+    | '/r/$id/concluido'
+    | '/pesquisas/$id'
+    | '/r/$id'
+    | '/pesquisas/$id/respostas/$rid'
+    | '/pesquisas/$id/respostas'
+  id:
+    | '__root__'
+    | '/'
+    | '/cadastro'
+    | '/configuracoes'
+    | '/dashboard'
+    | '/pesquisas/nova'
+    | '/pesquisas/'
+    | '/pesquisas/$id/relatorio'
+    | '/pesquisas/$id/revisao'
+    | '/r/$id/chat'
+    | '/r/$id/concluido'
+    | '/pesquisas/$id/'
+    | '/r/$id/'
+    | '/pesquisas/$id/respostas/$rid'
+    | '/pesquisas/$id/respostas/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CadastroRoute: typeof CadastroRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
+  DashboardRoute: typeof DashboardRoute
+  PesquisasNovaRoute: typeof PesquisasNovaRoute
+  PesquisasIndexRoute: typeof PesquisasIndexRoute
+  PesquisasIdRelatorioRoute: typeof PesquisasIdRelatorioRoute
+  PesquisasIdRevisaoRoute: typeof PesquisasIdRevisaoRoute
+  RIdChatRoute: typeof RIdChatRoute
+  RIdConcluidoRoute: typeof RIdConcluidoRoute
+  PesquisasIdIndexRoute: typeof PesquisasIdIndexRoute
+  RIdIndexRoute: typeof RIdIndexRoute
+  PesquisasIdRespostasRidRoute: typeof PesquisasIdRespostasRidRoute
+  PesquisasIdRespostasIndexRoute: typeof PesquisasIdRespostasIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/configuracoes': {
+      id: '/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +243,94 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pesquisas/': {
+      id: '/pesquisas/'
+      path: '/pesquisas'
+      fullPath: '/pesquisas/'
+      preLoaderRoute: typeof PesquisasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesquisas/nova': {
+      id: '/pesquisas/nova'
+      path: '/pesquisas/nova'
+      fullPath: '/pesquisas/nova'
+      preLoaderRoute: typeof PesquisasNovaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$id/': {
+      id: '/r/$id/'
+      path: '/r/$id'
+      fullPath: '/r/$id/'
+      preLoaderRoute: typeof RIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesquisas/$id/': {
+      id: '/pesquisas/$id/'
+      path: '/pesquisas/$id'
+      fullPath: '/pesquisas/$id/'
+      preLoaderRoute: typeof PesquisasIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$id/concluido': {
+      id: '/r/$id/concluido'
+      path: '/r/$id/concluido'
+      fullPath: '/r/$id/concluido'
+      preLoaderRoute: typeof RIdConcluidoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$id/chat': {
+      id: '/r/$id/chat'
+      path: '/r/$id/chat'
+      fullPath: '/r/$id/chat'
+      preLoaderRoute: typeof RIdChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesquisas/$id/revisao': {
+      id: '/pesquisas/$id/revisao'
+      path: '/pesquisas/$id/revisao'
+      fullPath: '/pesquisas/$id/revisao'
+      preLoaderRoute: typeof PesquisasIdRevisaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesquisas/$id/relatorio': {
+      id: '/pesquisas/$id/relatorio'
+      path: '/pesquisas/$id/relatorio'
+      fullPath: '/pesquisas/$id/relatorio'
+      preLoaderRoute: typeof PesquisasIdRelatorioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesquisas/$id/respostas/': {
+      id: '/pesquisas/$id/respostas/'
+      path: '/pesquisas/$id/respostas'
+      fullPath: '/pesquisas/$id/respostas/'
+      preLoaderRoute: typeof PesquisasIdRespostasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesquisas/$id/respostas/$rid': {
+      id: '/pesquisas/$id/respostas/$rid'
+      path: '/pesquisas/$id/respostas/$rid'
+      fullPath: '/pesquisas/$id/respostas/$rid'
+      preLoaderRoute: typeof PesquisasIdRespostasRidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CadastroRoute: CadastroRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
+  DashboardRoute: DashboardRoute,
+  PesquisasNovaRoute: PesquisasNovaRoute,
+  PesquisasIndexRoute: PesquisasIndexRoute,
+  PesquisasIdRelatorioRoute: PesquisasIdRelatorioRoute,
+  PesquisasIdRevisaoRoute: PesquisasIdRevisaoRoute,
+  RIdChatRoute: RIdChatRoute,
+  RIdConcluidoRoute: RIdConcluidoRoute,
+  PesquisasIdIndexRoute: PesquisasIdIndexRoute,
+  RIdIndexRoute: RIdIndexRoute,
+  PesquisasIdRespostasRidRoute: PesquisasIdRespostasRidRoute,
+  PesquisasIdRespostasIndexRoute: PesquisasIdRespostasIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
