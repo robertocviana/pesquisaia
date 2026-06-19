@@ -52,6 +52,28 @@ class SurveyController
         $currentPath = '/pesquisas/nova';
         $user        = Auth::user();
 
+        // Buscar histórico do chat para renderizar na tela
+        $history = \App\Models\Conversation::findBySurvey($surveyId);
+
+        // Determinar a etapa atual para o progresso inicial do JS
+        $currentStage = 'objetivo';
+        if (empty($survey['objective'])) {
+            $currentStage = 'objetivo';
+        } elseif (empty($survey['audience'])) {
+            $currentStage = 'publico';
+        } elseif (empty($survey['name']) || $survey['name'] === 'Nova pesquisa') {
+            $currentStage = 'nome';
+        } elseif (empty($survey['goal_responses'])) {
+            $currentStage = 'meta';
+        } else {
+            $questions = \App\Models\Question::findBySurvey($surveyId);
+            if (empty($questions)) {
+                $currentStage = 'perguntas';
+            } else {
+                $currentStage = 'finalizado';
+            }
+        }
+
         require BASE_PATH . '/app/Views/surveys/nova.php';
     }
 

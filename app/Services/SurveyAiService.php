@@ -38,7 +38,7 @@ Siga este fluxo OBRIGATÓRIO:
 REGRAS IMPORTANTES:
 - Seja amigável, objetivo e use português do Brasil.
 - Faça UMA pergunta por vez.
-- Quando gerar as perguntas, inclua-as na resposta de forma clara.
+- IMPORTANTE: Assim que você receber ou definir a META DE RESPOSTAS, você já terá coletado todos os dados obrigatórios (objetivo, público, nome, meta). Você deve gerar as 4 a 6 perguntas abertas IMEDIATAMENTE nessa mesma resposta! Defina o campo "stage" como "finalizado", preencha o array "questions" com as perguntas geradas e inclua-as de forma clara na "message" para o usuário revisar. Não divida isso em dois turnos.
 - Sempre retorne JSON com esta estrutura:
 
 {
@@ -207,6 +207,21 @@ PROMPT;
         $stage     = $data['stage']     ?? 'objetivo';
         $fields    = $data['fields']    ?? [];
         $questions = $data['questions'] ?? [];
+
+        // Redundância / Safety Net: se a IA transitou para o estágio de perguntas/finalizado 
+        // mas o array de perguntas veio vazio, geramos as perguntas localmente usando o modo determinístico
+        // para que o usuário não fique preso na conversa sem botões/perguntas.
+        if (($stage === 'perguntas' || $stage === 'finalizado') && empty($questions)) {
+            $survey = Survey::findById($surveyId);
+            $objective = $fields['objective'] ?? $survey['objective'] ?? '';
+            $audience = $fields['audience'] ?? $survey['audience'] ?? '';
+            if (!empty($objective) && !empty($audience)) {
+                $questions = $this->generateQuestions($objective, $audience);
+                $stage = 'finalizado';
+                $qList = implode("\n", array_map(fn($i, $q) => ($i+1).". {$q}", array_keys($questions), $questions));
+                $message .= "\n\n(Gerado automaticamente):\n{$qList}";
+            }
+        }
 
         Conversation::add($surveyId, 'assistant', $message);
 

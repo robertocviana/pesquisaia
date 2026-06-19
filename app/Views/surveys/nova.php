@@ -53,14 +53,49 @@
 
             <div id="chat-scroll" class="flex-1 overflow-y-auto px-6 py-8">
                 <div class="max-w-2xl mx-auto space-y-5" id="messages-container">
-                    <div class="flex gap-3">
-                        <div class="w-8 h-8 shrink-0 rounded-lg bg-[#6366f1] flex items-center justify-center">
-                            <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+                    <?php if (empty($history)): ?>
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 shrink-0 rounded-lg bg-[#6366f1] flex items-center justify-center">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+                            </div>
+                            <div class="text-sm leading-relaxed text-[#1e1b4b] pt-1">
+                                Olá! Vou te ajudar a criar sua pesquisa. Qual é o <strong>objetivo</strong> dela? O que você quer descobrir ou medir?
+                            </div>
                         </div>
-                        <div class="text-sm leading-relaxed text-[#1e1b4b] pt-1">
-                            Olá! Vou te ajudar a criar sua pesquisa. Qual é o <strong>objetivo</strong> dela? O que você quer descobrir ou medir?
-                        </div>
-                    </div>
+                    <?php else: ?>
+                        <?php foreach ($history as $msg): ?>
+                            <?php if ($msg['role'] === 'assistant'): 
+                                $msgHtml = htmlspecialchars($msg['content']);
+                                $msgHtml = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $msgHtml);
+                                $msgHtml = nl2br($msgHtml);
+                            ?>
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 shrink-0 rounded-lg bg-[#6366f1] flex items-center justify-center">
+                                        <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+                                    </div>
+                                    <div class="text-sm leading-relaxed text-[#1e1b4b] pt-1">
+                                        <?= $msgHtml ?>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="flex justify-end">
+                                    <div class="max-w-[80%] rounded-2xl rounded-tr-sm bg-[#6366f1] px-4 py-2.5 text-sm text-white">
+                                        <?= htmlspecialchars($msg['content']) ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                        <?php if ($currentStage === 'finalizado'): ?>
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 shrink-0 rounded-lg bg-[#6366f1] flex items-center justify-center">
+                                    <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+                                </div>
+                                <div class="text-sm leading-relaxed text-[#1e1b4b] pt-1">
+                                    <a href="/pesquisas/revisao?id=<?= $surveyId ?>" class="inline-flex items-center gap-1.5 mt-2 rounded-lg bg-[#6366f1] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition">Revisar e publicar →</a>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
                 </div>
                 <div id="chat-end"></div>
             </div>
@@ -116,9 +151,15 @@ lucide.createIcons();
 const SURVEY_ID  = <?= (int) ($survey['id'] ?? 0) ?>;
 const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
-let currentStage    = 'objetivo';
-let questionsCount  = 0;
+let currentStage    = '<?= $currentStage ?>';
+let questionsCount  = <?= count($questions ?? []) ?>;
 let isSending       = false;
+
+// Executar atualização de progresso no carregamento da página
+document.addEventListener('DOMContentLoaded', () => {
+    updateProgress(currentStage);
+    scrollToEnd();
+});
 
 function scrollToEnd() {
     document.getElementById('chat-end').scrollIntoView({ behavior: 'smooth' });
