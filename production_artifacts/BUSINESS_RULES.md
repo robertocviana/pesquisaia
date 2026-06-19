@@ -187,6 +187,47 @@ OPENAI_API_KEY=sk-...
 
 ---
 
+## 11. Tratamento de Erros de IA — Modo Fallback
+
+> **Regra adicionada em:** 2026-06-19 — fix/openai-quota-error-handling
+> **Motivação:** Conta OpenAI com quota esgotada travava completamente o fluxo de criação de pesquisas.
+
+### Hierarquia de erros (`AiException`)
+
+Todos os erros da API OpenAI são agora encapsulados em `App\Services\AiException` com código tipado:
+
+| Código (`getErrorCode()`) | Causa | Comportamento |
+|--------------------------|-------|---------------|
+| `quota_exceeded` | Cota de uso esgotada (HTTP 429 + "quota") | Ativa modo fallback manual |
+| `auth_failed` | Chave de API inválida (HTTP 401) | Ativa modo fallback manual |
+| `rate_limit` | Muitas requisições (HTTP 429 sem quota) | Retorna erro retryable ao frontend |
+| `timeout` | CURL timeout > 60s | Retorna erro retryable ao frontend |
+| `network_error` | CURL error de conexão | Retorna erro retryable ao frontend |
+
+### Modo Fallback Manual (`SurveyAiService`)
+
+Quando a IA está indisponível por `quota_exceeded` ou `auth_failed`:
+- `SurveyAiService::fallbackMode()` é ativado automaticamente
+- O fluxo coleta objetivo → público → nome → meta → gera 5 perguntas genéricas
+- O usuário vê um banner amarelo de aviso (não um erro)
+- **Os dados são sempre salvos no banco** — modo fallback é transparente para o banco
+- A pesquisa pode ser publicada normalmente após o fluxo manual
+
+### Relatório sem IA (`ReportService`)
+
+Quando a IA está indisponível ao gerar relatório:
+- O erro é capturado e convertido em `RuntimeException` com mensagem amigável em português
+- O `flash_error` é exibido na página de relatório
+- O usuário pode tentar novamente quando a cota for recarregada
+
+### Frontend (nova.php)
+
+- Erros retryable: exibem mensagem com botão "Tentar novamente"
+- Erros definitivos (quota/auth): sem botão de retry (não adianta tentar de novo)
+- Modo fallback: banner amarelo no topo do chat (exibido apenas uma vez)
+
+---
+
 ## 9. Como Executar Migrations
 
 ```bash

@@ -229,9 +229,19 @@ async function send() {
         removeTypingIndicator();
 
         if (data.error) {
-            addMessage('assistant', `⚠️ Erro: ${data.error}`);
+            // Erro retryable (timeout, rede): mostrar botão de tentar novamente
+            if (data.retryable) {
+                addErrorMessage(data.error, true);
+            } else {
+                addErrorMessage(data.error, false);
+            }
             setLoading(false);
             return;
+        }
+
+        // Exibir banner de aviso se estiver no modo fallback (IA indisponível)
+        if (data.warning) {
+            showFallbackBanner(data.warning.message);
         }
 
         // Atualizar nome da pesquisa se disponível
@@ -242,8 +252,10 @@ async function send() {
         currentStage = data.stage ?? 'objetivo';
         updateProgress(currentStage);
 
-        // Exibir mensagem da IA
-        let msgHtml = data.message.replace(/\n/g, '<br>');
+        // Renderizar markdown simples (negrito, quebras de linha)
+        let msgHtml = data.message
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
 
         // Se as perguntas foram geradas, adicionar link para revisão
         if (data.stage === 'finalizado' || data.questionsCount > 0) {
@@ -254,10 +266,47 @@ async function send() {
 
     } catch (err) {
         removeTypingIndicator();
-        addMessage('assistant', '⚠️ Ocorreu um erro de conexão. Tente novamente.');
+        addErrorMessage('Sem conexão com o servidor. Verifique sua internet e tente novamente.', true);
     }
 
     setLoading(false);
+}
+
+function addErrorMessage(msg, retryable = false) {
+    const container = document.getElementById('messages-container');
+    const div = document.createElement('div');
+    div.className = 'flex gap-3';
+    const retryBtn = retryable
+        ? `<button onclick="document.getElementById('chat-input').focus()" class="mt-2 text-xs text-[#6366f1] underline hover:no-underline">Tentar novamente</button>`
+        : '';
+    div.innerHTML = `
+        <div class="rounded-2xl rounded-tl-sm border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700 max-w-[85%]">
+            <div class="flex items-center gap-1.5 font-medium mb-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Ocorreu um problema
+            </div>
+            <div>${msg}</div>
+            ${retryBtn}
+        </div>`;
+    container.appendChild(div);
+    document.getElementById('chat-end').scrollIntoView({ behavior: 'smooth' });
+}
+
+let fallbackBannerShown = false;
+function showFallbackBanner(msg) {
+    if (fallbackBannerShown) return;
+    fallbackBannerShown = true;
+    const banner = document.createElement('div');
+    banner.className = 'mx-auto max-w-xl mb-2';
+    banner.innerHTML = `
+        <div class="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-2.5 text-xs text-yellow-800 flex items-start gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 mt-0.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>${msg} O assistente está operando em modo manual — suas respostas ainda serão salvas normalmente.</span>
+        </div>`;
+    document.getElementById('messages-container').insertBefore(
+        banner,
+        document.getElementById('messages-container').firstChild
+    );
 }
 
 document.getElementById('chat-send').addEventListener('click', send);

@@ -45,10 +45,27 @@ class ReportService
         // Montar o prompt com os dados da pesquisa
         $prompt = $this->buildPrompt($survey, $questions, $responses);
 
-        $raw = $this->ai->complete([
-            ['role' => 'system', 'content' => 'Você é um especialista em análise de pesquisas qualitativas. Responda sempre em JSON válido.'],
-            ['role' => 'user',   'content' => $prompt],
-        ], jsonMode: true, maxTokens: 2000);
+        try {
+            $raw = $this->ai->complete([
+                ['role' => 'system', 'content' => 'Você é um especialista em análise de pesquisas qualitativas. Responda sempre em JSON válido.'],
+                ['role' => 'user',   'content' => $prompt],
+            ], jsonMode: true, maxTokens: 2000);
+        } catch (AiException $e) {
+            if ($e->isQuotaError()) {
+                throw new \RuntimeException(
+                    'Não foi possível gerar o relatório: cota da OpenAI esgotada. ' .
+                    'Verifique seu plano em platform.openai.com/account/billing e tente novamente.'
+                );
+            }
+            if ($e->isAuthError()) {
+                throw new \RuntimeException(
+                    'Não foi possível gerar o relatório: chave de API inválida. ' .
+                    'Verifique o valor de OPENAI_API_KEY no .env.'
+                );
+            }
+            // Outros erros (timeout, rede): mensagem genérica retryable
+            throw new \RuntimeException($e->getMessage());
+        }
 
         $data = json_decode($raw, true);
 

@@ -2,9 +2,9 @@
 
 namespace App\Controllers;
 
-use App\Helpers\Csrf;
-use App\Services\SurveyAiService;
 use App\Helpers\Auth;
+use App\Services\SurveyAiService;
+use App\Services\AiException;
 
 /**
  * AiController — Endpoints AJAX para o chat de criação de pesquisa.
@@ -13,7 +13,7 @@ class AiController
 {
     /**
      * POST /pesquisas/nova/chat
-     * Recebe { survey_id, message } e retorna resposta da IA.
+     * Recebe { survey_id, message } e retorna resposta da IA (ou fallback manual).
      */
     public function chat(): void
     {
@@ -40,9 +40,28 @@ class AiController
         }
 
         try {
-            $service  = new SurveyAiService();
-            $result   = $service->chat($surveyId, $message);
+            $service = new SurveyAiService();
+            $result  = $service->chat($surveyId, $message);
+
+            // Se modo fallback: adicionar aviso na resposta (sem travar o fluxo)
+            if (!empty($result['fallback_mode'])) {
+                $result['warning'] = [
+                    'type'    => 'quota',
+                    'message' => '⚠️ IA temporariamente indisponível. Usando modo de coleta manual.',
+                ];
+            }
+
             echo json_encode($result);
+
+        } catch (AiException $e) {
+            // Erros de rede/timeout — retry é possível
+            http_response_code(503);
+            echo json_encode([
+                'error'      => $e->getMessage(),
+                'error_code' => $e->getErrorCode(),
+                'retryable'  => $e->isNetworkError(),
+            ]);
+
         } catch (\RuntimeException $e) {
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
