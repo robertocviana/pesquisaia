@@ -112,16 +112,25 @@
 <script>
 lucide.createIcons();
 
-const aiFlow = [
-    { ask: "Perfeito! Qual público vai responder essa pesquisa?", step: "objetivo" },
-    { ask: "Excelente. Quantas perguntas você gostaria? Posso sugerir 4 baseadas no seu objetivo.", step: "publico" },
-    { ask: "Pronto! Gerei 4 perguntas para você. Clique abaixo para ir à revisão e ajustar antes de publicar.", step: "perguntas" },
-];
+// ─── Configuração real da IA ──────────────────────────────────────────────────
+const SURVEY_ID  = <?= (int) ($survey['id'] ?? 0) ?>;
+const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
-let step = 0;
+let currentStage    = 'objetivo';
+let questionsCount  = 0;
+let isSending       = false;
 
 function scrollToEnd() {
     document.getElementById('chat-end').scrollIntoView({ behavior: 'smooth' });
+}
+
+function setLoading(loading) {
+    isSending = loading;
+    const btn = document.getElementById('chat-send');
+    const inp = document.getElementById('chat-input');
+    btn.disabled = loading;
+    inp.disabled = loading;
+    btn.style.opacity = loading ? '0.5' : '1';
 }
 
 function addMessage(role, html) {
@@ -142,42 +151,113 @@ function addMessage(role, html) {
     scrollToEnd();
 }
 
-function updateProgress() {
-    const pct = Math.min(100, Math.round((step / aiFlow.length) * 100));
+function addTypingIndicator() {
+    const container = document.getElementById('messages-container');
+    const div = document.createElement('div');
+    div.id = 'typing-indicator';
+    div.className = 'flex gap-3';
+    div.innerHTML = `
+        <div class="w-8 h-8 shrink-0 rounded-lg bg-[#6366f1] flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+        </div>
+        <div class="text-sm leading-relaxed text-[#6b7280] pt-2 flex gap-1 items-center">
+            <span class="w-2 h-2 bg-[#6b7280] rounded-full animate-bounce" style="animation-delay:0ms"></span>
+            <span class="w-2 h-2 bg-[#6b7280] rounded-full animate-bounce" style="animation-delay:150ms"></span>
+            <span class="w-2 h-2 bg-[#6b7280] rounded-full animate-bounce" style="animation-delay:300ms"></span>
+        </div>`;
+    container.appendChild(div);
+    scrollToEnd();
+}
+
+function removeTypingIndicator() {
+    document.getElementById('typing-indicator')?.remove();
+}
+
+function updateProgress(stage) {
+    const stageOrder = ['objetivo', 'publico', 'nome', 'meta', 'perguntas', 'finalizado'];
+    const stepKeys   = ['objetivo', 'publico', 'perguntas', 'revisao'];
+
+    const stageIdx = stageOrder.indexOf(stage);
+    const stepIdx  = Math.min(Math.floor(stageIdx / (stageOrder.length / stepKeys.length)), stepKeys.length);
+
+    const pct = Math.min(100, Math.round((stageIdx / (stageOrder.length - 1)) * 100));
     document.getElementById('progress-bar').style.width = pct + '%';
     document.getElementById('progress-label').textContent = pct + '%';
 
-    const stepKeys = ['objetivo', 'publico', 'perguntas', 'revisao'];
     stepKeys.forEach((key, i) => {
         const el = document.querySelector(`[data-step="${key}"]`);
         if (!el) return;
-        if (i < step) {
+        const label = el.textContent.replace(/[✓]/g, '').trim();
+        if (i < stepIdx) {
             el.className = 'flex items-center gap-2.5 text-sm text-[#22c55e]';
-            el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> ${el.textContent.trim()}`;
-        } else if (i === step) {
+            el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> ${label}`;
+        } else if (i === stepIdx) {
             el.className = 'flex items-center gap-2.5 text-sm text-[#1e1b4b] font-medium';
-            el.innerHTML = `<span class="w-4 h-4 rounded-full border-2 border-[#6366f1]"></span> ${el.textContent.trim()}`;
+            el.innerHTML = `<span class="w-4 h-4 rounded-full border-2 border-[#6366f1]"></span> ${label}`;
         }
     });
+
+    // Atualizar nome da pesquisa na sidebar
+    const nameField = document.getElementById('survey-name');
+    if (nameField && window._surveyName) {
+        nameField.textContent = window._surveyName;
+    }
 }
 
-function send() {
+async function send() {
+    if (isSending) return;
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
     if (!text) return;
+
     input.value = '';
     addMessage('user', text);
+    setLoading(true);
+    addTypingIndicator();
 
-    setTimeout(() => {
-        if (step >= aiFlow.length) {
-            addMessage('assistant', 'Ótimo! <a href="/pesquisas/revisao?id=s-001" class="text-[#6366f1] underline font-medium">Clique aqui para revisar e publicar sua pesquisa →</a>');
+    try {
+        const res = await fetch('/pesquisas/nova/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+            },
+            body: JSON.stringify({ survey_id: SURVEY_ID, message: text }),
+        });
+
+        const data = await res.json();
+        removeTypingIndicator();
+
+        if (data.error) {
+            addMessage('assistant', `⚠️ Erro: ${data.error}`);
+            setLoading(false);
             return;
         }
-        const current = aiFlow[step];
-        addMessage('assistant', current.ask);
-        step++;
-        updateProgress();
-    }, 600);
+
+        // Atualizar nome da pesquisa se disponível
+        if (data.fields?.name) {
+            window._surveyName = data.fields.name;
+        }
+
+        currentStage = data.stage ?? 'objetivo';
+        updateProgress(currentStage);
+
+        // Exibir mensagem da IA
+        let msgHtml = data.message.replace(/\n/g, '<br>');
+
+        // Se as perguntas foram geradas, adicionar link para revisão
+        if (data.stage === 'finalizado' || data.questionsCount > 0) {
+            msgHtml += `<br><br><a href="/pesquisas/revisao?id=${SURVEY_ID}" class="inline-flex items-center gap-1.5 mt-2 rounded-lg bg-[#6366f1] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition">Revisar e publicar →</a>`;
+        }
+
+        addMessage('assistant', msgHtml);
+
+    } catch (err) {
+        removeTypingIndicator();
+        addMessage('assistant', '⚠️ Ocorreu um erro de conexão. Tente novamente.');
+    }
+
+    setLoading(false);
 }
 
 document.getElementById('chat-send').addEventListener('click', send);
@@ -185,7 +265,7 @@ document.getElementById('chat-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
 });
 
-updateProgress();
+
 </script>
 </body>
 </html>

@@ -68,10 +68,14 @@
         <a href="/pesquisas" class="rounded-lg border border-[#e5e7eb] bg-white px-4 py-2.5 text-sm hover:bg-[#f3f4f6] transition">
             Voltar
         </a>
-        <a href="/pesquisas/detalhe?id=<?= $survey['id'] ?>"
-           class="inline-flex items-center gap-2 rounded-lg bg-[#6366f1] px-4 py-2.5 text-sm font-medium text-white shadow-[0_20px_40px_-20px_rgb(99_102_241_/_0.35)] hover:opacity-90 transition">
-            <i data-lucide="rocket" class="w-4 h-4"></i> Publicar pesquisa
-        </a>
+        <form method="POST" action="/pesquisas/publicar">
+            <?= \App\Helpers\Csrf::field() ?>
+            <input type="hidden" name="survey_id" value="<?= (int) $survey['id'] ?>">
+            <button type="submit"
+               class="inline-flex items-center gap-2 rounded-lg bg-[#6366f1] px-4 py-2.5 text-sm font-medium text-white shadow-[0_20px_40px_-20px_rgb(99_102_241_/_0.35)] hover:opacity-90 transition">
+                <i data-lucide="rocket" class="w-4 h-4"></i> Publicar pesquisa
+            </button>
+        </form>
     </div>
 </div>
 

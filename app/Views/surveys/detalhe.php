@@ -10,7 +10,7 @@
     <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
             <h1 class="text-2xl font-semibold tracking-tight text-[#1e1b4b]"><?= htmlspecialchars($survey['name']) ?></h1>
-            <p class="text-sm text-[#6b7280] mt-1">Criada em <?= \App\Helpers\MockData::formatDate($survey['createdAt']) ?></p>
+            <p class="text-sm text-[#6b7280] mt-1">Criada em <?= date('d/m/Y', strtotime($survey['created_at'])) ?></p>
         </div>
         <?php
         $badgeStyles = [
@@ -65,11 +65,11 @@
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-[#6b7280]">Respostas recebidas</span>
-                    <span class="text-lg font-semibold text-[#1e1b4b]"><?= count($survey['responses']) ?></span>
+                    <span class="text-lg font-semibold text-[#1e1b4b]"><?= (int) $survey['response_count'] ?></span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-[#6b7280]">Meta definida</span>
-                    <span class="text-lg font-semibold text-[#1e1b4b]"><?= $survey['goal'] ?></span>
+                    <span class="text-lg font-semibold text-[#1e1b4b]"><?= $survey['goal_responses'] ?? '—' ?></span>
                 </div>
                 <div>
                     <div class="flex items-center justify-between text-sm mb-2">
@@ -95,10 +95,14 @@
             <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Ver relatório
         </a>
         <?php if ($survey['status'] === 'ativa'): ?>
-        <button onclick="if(confirm('Encerrar esta pesquisa?')) window.location.href='/pesquisas'"
-           class="ml-auto inline-flex items-center gap-2 rounded-lg border border-[#ef4444]/30 text-[#ef4444] bg-white px-4 py-2.5 text-sm hover:bg-[#ef4444]/5 transition">
-            <i data-lucide="x-circle" class="w-4 h-4"></i> Encerrar pesquisa
-        </button>
+        <form method="POST" action="/pesquisas/encerrar" class="ml-auto"
+              onsubmit="return confirm('Encerrar esta pesquisa? Novos respondentes serão bloqueados.')">
+            <?= \App\Helpers\Csrf::field() ?>
+            <input type="hidden" name="survey_id" value="<?= (int) $survey['id'] ?>">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-lg border border-[#ef4444]/30 text-[#ef4444] bg-white px-4 py-2.5 text-sm hover:bg-[#ef4444]/5 transition">
+                <i data-lucide="x-circle" class="w-4 h-4"></i> Encerrar pesquisa
+            </button>
+        </form>
         <?php endif; ?>
     </div>
 </div>

@@ -24,31 +24,34 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Router
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$method = $_SERVER['REQUEST_METHOD'];
 
-// ─── Área Pública — Auth ────────────────────────────────────────────────────
+// ─── Raiz ────────────────────────────────────────────────────────────────────
 if ($uri === '/' || $uri === '/index.php') {
     header('Location: /login');
     exit;
+}
 
-} elseif ($uri === '/login') {
+// ─── Auth ────────────────────────────────────────────────────────────────────
+if ($uri === '/login') {
     $c = new \App\Controllers\AuthController();
-    $c->login();
+    $method === 'POST' ? $c->handleLogin() : $c->login();
 
 } elseif ($uri === '/cadastro') {
     $c = new \App\Controllers\AuthController();
-    $c->cadastro();
+    $method === 'POST' ? $c->handleCadastro() : $c->cadastro();
 
 } elseif ($uri === '/logout') {
     $c = new \App\Controllers\AuthController();
     $c->logout();
 
-// ─── Dashboard ──────────────────────────────────────────────────────────────
+// ─── Dashboard ───────────────────────────────────────────────────────────────
 } elseif ($uri === '/dashboard') {
     $c = new \App\Controllers\DashboardController();
     $c->index();
 
-// ─── Pesquisas ──────────────────────────────────────────────────────────────
+// ─── Pesquisas ───────────────────────────────────────────────────────────────
 } elseif ($uri === '/pesquisas' || $uri === '/pesquisas/') {
     $c = new \App\Controllers\SurveyController();
     $c->index();
@@ -56,6 +59,10 @@ if ($uri === '/' || $uri === '/index.php') {
 } elseif ($uri === '/pesquisas/nova') {
     $c = new \App\Controllers\SurveyController();
     $c->nova();
+
+} elseif ($uri === '/pesquisas/nova/chat') {
+    $c = new \App\Controllers\AiController();
+    $c->chat();
 
 } elseif ($uri === '/pesquisas/detalhe') {
     $c = new \App\Controllers\SurveyController();
@@ -65,11 +72,31 @@ if ($uri === '/' || $uri === '/index.php') {
     $c = new \App\Controllers\SurveyController();
     $c->revisao();
 
+} elseif ($uri === '/pesquisas/revisao/salvar') {
+    $c = new \App\Controllers\SurveyController();
+    $c->handleRevisaoSalvar();
+
+} elseif ($uri === '/pesquisas/publicar') {
+    $c = new \App\Controllers\SurveyController();
+    $c->handlePublicar();
+
+} elseif ($uri === '/pesquisas/encerrar') {
+    $c = new \App\Controllers\SurveyController();
+    $c->handleEncerrar();
+
 } elseif ($uri === '/pesquisas/relatorio') {
     $c = new \App\Controllers\SurveyController();
     $c->relatorio();
 
-// ─── Respostas ───────────────────────────────────────────────────────────────
+} elseif ($uri === '/pesquisas/relatorio/gerar') {
+    $c = new \App\Controllers\SurveyController();
+    $c->handleRelatorioGerar();
+
+} elseif ($uri === '/pesquisas/exportar') {
+    $c = new \App\Controllers\SurveyController();
+    $c->exportar();
+
+// ─── Respostas ────────────────────────────────────────────────────────────────
 } elseif ($uri === '/pesquisas/respostas') {
     $c = new \App\Controllers\ResponseController();
     $c->index();
@@ -78,23 +105,30 @@ if ($uri === '/' || $uri === '/index.php') {
     $c = new \App\Controllers\ResponseController();
     $c->show();
 
-// ─── Configurações ───────────────────────────────────────────────────────────
+// ─── Configurações ────────────────────────────────────────────────────────────
 } elseif ($uri === '/configuracoes') {
     $c = new \App\Controllers\SettingsController();
     $c->index();
 
-// ─── Área Pública — Respondente ──────────────────────────────────────────────
-} elseif ($uri === '/r/intro') {
+// ─── Área Pública — Respondente (rotas dinâmicas /r/{slug}) ──────────────────
+} elseif (preg_match('#^/r/([a-f0-9]{16})$#', $uri, $m)) {
+    $_GET['slug'] = $m[1];
     $c = new \App\Controllers\RespondentController();
     $c->intro();
 
-} elseif ($uri === '/r/chat') {
+} elseif (preg_match('#^/r/([a-f0-9]{16})/chat$#', $uri, $m)) {
+    $_GET['slug'] = $m[1];
     $c = new \App\Controllers\RespondentController();
     $c->chat();
 
-} elseif ($uri === '/r/concluido') {
+} elseif (preg_match('#^/r/([a-f0-9]{16})/concluido$#', $uri, $m)) {
+    $_GET['slug'] = $m[1];
     $c = new \App\Controllers\RespondentController();
     $c->concluido();
+
+} elseif ($uri === '/r/responder') {
+    $c = new \App\Controllers\RespondentController();
+    $c->responder();
 
 // ─── 404 ─────────────────────────────────────────────────────────────────────
 } else {

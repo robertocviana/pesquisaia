@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($title) ? htmlspecialchars($title) . ' — ' : '' ?>PesquisaIA</title>
     <meta name="description" content="<?= isset($description) ? htmlspecialchars($description) : 'Pesquisas inteligentes em minutos.' ?>">
+    <meta name="csrf-token" content="<?= htmlspecialchars(\App\Helpers\Csrf::token(), ENT_QUOTES, 'UTF-8') ?>">
 
     <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

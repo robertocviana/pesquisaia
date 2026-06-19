@@ -1,7 +1,7 @@
 <?php
-$surveyId = htmlspecialchars($_GET['id'] ?? 's-001');
-$questions = $survey['questions'];
-$total = count($questions);
+$slug      = $_GET['slug'] ?? '';
+$questions = Question::findBySurvey((int) $survey['id']);
+$total     = count($questions);
 require BASE_PATH . '/app/Views/templates/header.php';
 ?>
 
@@ -13,7 +13,7 @@ require BASE_PATH . '/app/Views/templates/header.php';
         </div>
         <div class="flex-1 min-w-0">
             <div class="font-semibold text-sm text-[#1e1b4b] truncate"><?= htmlspecialchars($survey['name']) ?></div>
-            <div id="question-counter" class="text-xs text-[#6b7280]">Pergunta 1 de <?= $total ?></div>
+            <div id="question-counter" class="text-xs text-[#6b7280]">Iniciando...</div>
         </div>
     </header>
 
@@ -43,10 +43,20 @@ require BASE_PATH . '/app/Views/templates/header.php';
 <script>
 lucide.createIcons();
 
-const questions = <?= json_encode(array_values(array_column($questions, 'text'))) ?>;
-const total = questions.length;
-const surveyId = '<?= $surveyId ?>';
-let step = 0;
+const SURVEY_SLUG = '<?= htmlspecialchars($slug) ?>';
+const SURVEY_ID   = <?= (int) $survey['id'] ?>;
+const RESPONDENT_ID = <?= (int) ($respondent['id'] ?? 0) ?>;
+
+const questions = <?= json_encode(array_values(array_map(fn($q) => ['id' => (int)$q['id'], 'text' => $q['text']], $questions))) ?>;
+const total     = questions.length;
+const answered  = <?= (int) ($answered ?? 0) ?>;
+
+// Descobrir a primeira pergunta não respondida
+let step = answered;
+
+// Controle de nome
+let nameCollected = <?= ($respondent['name'] ? 'true' : 'false') ?>;
+let pendingName   = false;
 
 function scrollToEnd() {
     document.getElementById('chat-end').scrollIntoView({ behavior: 'smooth' });
@@ -66,29 +76,90 @@ function addMessage(role, text) {
     scrollToEnd();
 }
 
-function updateProgress() {
-    const pct = total > 0 ? Math.min(100, Math.round((step / total) * 100)) : 0;
+function updateProgress(currentStep) {
+    const pct = total > 0 ? Math.min(100, Math.round((currentStep / total) * 100)) : 0;
     document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('question-counter').textContent = `Pergunta ${Math.min(step + 1, total)} de ${total}`;
+    document.getElementById('question-counter').textContent =
+        currentStep < total ? `Pergunta ${currentStep + 1} de ${total}` : 'Concluindo...';
 }
 
-function send() {
+async function saveAnswer(questionId, text, name = null) {
+    try {
+        await fetch('/r/responder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                slug:        SURVEY_SLUG,
+                question_id: questionId,
+                answer:      text,
+                name:        name,
+            }),
+        });
+    } catch (e) {
+        console.error('Erro ao salvar resposta:', e);
+    }
+}
+
+async function send() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
     if (!text) return;
     input.value = '';
+    input.disabled = true;
+
     addMessage('user', text);
 
+    // Coletar nome primeiro
+    if (!nameCollected && pendingName) {
+        nameCollected = true;
+        pendingName   = false;
+        await saveAnswer(0, '', text); // Salvar nome
+        setTimeout(askQuestion, 500);
+        input.disabled = false;
+        return;
+    }
+
+    // Salvar resposta da pergunta atual
+    if (step < total) {
+        await saveAnswer(questions[step].id, text);
+        step++;
+    }
+
+    updateProgress(step);
+
+    if (step >= total) {
+        // Finalizar
+        addMessage('assistant', 'Obrigado pelas suas respostas! 🎉');
+        setTimeout(() => {
+            window.location.href = '/r/' + SURVEY_SLUG + '/concluido';
+        }, 1500);
+    } else {
+        setTimeout(askQuestion, 500);
+    }
+
+    input.disabled = false;
+}
+
+function askQuestion() {
+    if (step < total) {
+        addMessage('assistant', questions[step].text);
+        updateProgress(step);
+    }
+}
+
+// Iniciar conversa
+if (total > 0) {
     setTimeout(() => {
-        const nextStep = step + 1;
-        if (nextStep >= total) {
-            window.location.href = '/r/concluido?id=' + surveyId;
-            return;
+        if (!nameCollected) {
+            addMessage('assistant', 'Olá! Obrigado por participar 😊 Antes de começar, qual é o seu nome?');
+            pendingName = true;
+        } else {
+            addMessage('assistant', 'Olá! Obrigado por participar 😊 Vamos começar!');
+            setTimeout(askQuestion, 800);
         }
-        step = nextStep;
-        addMessage('assistant', questions[step]);
-        updateProgress();
-    }, 500);
+    }, 400);
+} else {
+    addMessage('assistant', 'Esta pesquisa ainda não tem perguntas.');
 }
 
 document.getElementById('chat-send').addEventListener('click', send);
@@ -96,13 +167,7 @@ document.getElementById('chat-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
 });
 
-// Inicia com as primeiras mensagens da IA
-if (total > 0) {
-    setTimeout(() => { addMessage('assistant', 'Oi! Obrigada por participar 😊'); }, 300);
-    setTimeout(() => { addMessage('assistant', questions[0]); updateProgress(); }, 800);
-} else {
-    addMessage('assistant', 'Esta pesquisa não tem perguntas ainda.');
-}
+updateProgress(step);
 </script>
 </body>
 </html>

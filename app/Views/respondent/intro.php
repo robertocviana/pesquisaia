@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <a href="/r/chat?id=<?= htmlspecialchars($_GET['id'] ?? 's-001') ?>"
+        <a href="/r/<?= htmlspecialchars($survey['public_slug'] ?? '') ?>/chat"
            class="mt-8 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#6366f1] py-3 text-sm font-medium text-white shadow-[0_20px_40px_-20px_rgb(99_102_241_/_0.35)] hover:opacity-90 transition">
             Iniciar pesquisa <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </a>

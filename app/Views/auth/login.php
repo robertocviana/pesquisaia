@@ -18,7 +18,14 @@
 
     <!-- Painel direito — formulário -->
     <div class="flex items-center justify-center p-6 sm:p-12">
-        <form action="/dashboard" method="GET" class="w-full max-w-sm">
+        <?php if (!empty($error)): ?>
+        <div class="absolute top-6 right-6 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+            <?= htmlspecialchars($error) ?>
+        </div>
+        <?php endif; ?>
+        <form action="/login" method="POST" class="w-full max-w-sm">
+            <?= \App\Helpers\Csrf::field() ?>
             <!-- Logo mobile -->
             <div class="lg:hidden flex items-center gap-2 mb-8">
                 <div class="w-9 h-9 rounded-xl bg-[#6366f1] flex items-center justify-center">
@@ -50,7 +57,7 @@
                         id="password"
                         type="password"
                         name="password"
-                        value="password"
+                        placeholder="Mínimo 8 caracteres"
                         class="mt-1.5 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6366f1]"
                     >
                 </div>
@@ -69,7 +76,7 @@
                 </div>
 
                 <a href="/dashboard"
-                   class="w-full rounded-lg border border-[#e5e7eb] bg-white py-2.5 text-sm font-medium text-[#1e1b4b] hover:bg-[#f3f4f6] transition flex items-center justify-center gap-2">
+                   class="w-full rounded-lg border border-[#e5e7eb] bg-white py-2.5 text-sm font-medium text-[#1e1b4b] hover:bg-[#f3f4f6] transition flex items-center justify-center gap-2 opacity-50 cursor-not-allowed pointer-events-none" title="Em breve">
                     <!-- Google icon -->
                     <svg width="16" height="16" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

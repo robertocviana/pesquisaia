@@ -1,7 +1,14 @@
 <?php require BASE_PATH . '/app/Views/templates/header.php'; ?>
 
 <div class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-[#eef2ff]/50 via-[#fafafa] to-[#eef2ff]/50">
-    <form action="/dashboard" method="GET" class="w-full max-w-md bg-white rounded-2xl border border-[#e5e7eb] p-8 shadow-[0_4px_6px_-1px_rgb(15_23_42_/_0.06),_0_10px_20px_-10px_rgb(15_23_42_/_0.10)]">
+    <?php if (!empty($error)): ?>
+    <div class="fixed top-6 right-6 z-50 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 flex items-center gap-2">
+        <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+        <?= htmlspecialchars($error) ?>
+    </div>
+    <?php endif; ?>
+    <form action="/cadastro" method="POST" class="w-full max-w-md bg-white rounded-2xl border border-[#e5e7eb] p-8 shadow-[0_4px_6px_-1px_rgb(15_23_42_/_0.06),_0_10px_20px_-10px_rgb(15_23_42_/_0.10)]">
+        <?= \App\Helpers\Csrf::field() ?>
         <div class="flex items-center gap-2 mb-6">
             <div class="w-9 h-9 rounded-xl bg-[#6366f1] flex items-center justify-center">
                 <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
@@ -25,12 +32,12 @@
             </div>
             <div>
                 <label class="text-sm font-medium text-[#1e1b4b]">Senha</label>
-                <input id="senha" type="password" name="senha"
+                <input id="senha" type="password" name="password" placeholder="Mínimo 8 caracteres"
                     class="mt-1.5 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6366f1]">
             </div>
             <div>
                 <label class="text-sm font-medium text-[#1e1b4b]">Confirmar senha</label>
-                <input id="senha2" type="password" name="senha2"
+                <input id="senha2" type="password" name="password_confirmation" placeholder="Repita a senha"
                     class="mt-1.5 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6366f1]">
             </div>
 
