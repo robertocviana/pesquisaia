@@ -213,6 +213,13 @@ Quando a IA está indisponível por `quota_exceeded` ou `auth_failed`:
 - **Os dados são sempre salvos no banco** — modo fallback é transparente para o banco
 - A pesquisa pode ser publicada normalmente após o fluxo manual
 
+### Preservação de Estado e Redundância (Safety Net)
+
+Para garantir que o fluxo de criação nunca fique travado ou em estado inconsistente:
+- **Restauração de Histórico**: Ao carregar ou recarregar `/pesquisas/nova`, o histórico completo da conversa é renderizado e a etapa ativa (`currentStage`) é calculada dinamicamente com base nos dados salvos no banco, sincronizando a interface do usuário.
+- **Geração Redundante (Safety Net)**: Se a IA responder com estágio `perguntas` ou `finalizado` mas a lista de perguntas vier vazia, o backend intercepta o retorno e gera as perguntas locais de modo determinístico, salvando-as no banco e liberando o botão de revisão no frontend.
+- **Geração Imediata**: O prompt do sistema foi otimizado para que a IA gere as perguntas no exato momento em que coleta o campo da meta de respostas, sem postergar a ação para um turno extra.
+
 ### Relatório sem IA (`ReportService`)
 
 Quando a IA está indisponível ao gerar relatório:
