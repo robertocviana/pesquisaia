@@ -79,7 +79,7 @@
                     </p>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <a href="/pesquisas/detalhe?id=<?= $s['id'] ?>"
+                    <a href="/pesquisas/<?= $s['status'] === 'rascunho' ? 'revisao' : 'detalhe' ?>?id=<?= $s['id'] ?>"
                        class="inline-flex items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm hover:bg-[#f3f4f6] transition">
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Abrir
                     </a>
