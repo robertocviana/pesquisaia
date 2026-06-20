@@ -18,7 +18,8 @@ class SurveyAiService
 
     public function __construct()
     {
-        $this->ai = new AiService('gpt-4o');
+        $model = $_ENV['OPENAI_MODEL_WIZARD'] ?? 'gpt-4o';
+        $this->ai = new AiService($model);
     }
 
     private function systemPrompt(): string

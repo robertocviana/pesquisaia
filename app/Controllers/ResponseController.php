@@ -47,9 +47,7 @@ class ResponseController
         $userId   = Auth::id();
         $surveyId = (int) ($_POST['survey_id'] ?? 0);
         $count    = (int) ($_POST['count'] ?? 10);
-        // Whitelist para evitar valores arbitrários no parâmetro de estratégia
-        $strategyInput = $_POST['strategy'] ?? 'hybrid';
-        $strategy = in_array($strategyInput, ['hybrid', 'local'], true) ? $strategyInput : 'local';
+        $strategy = 'hybrid';
 
         // Garante ownership da pesquisa
         $survey = Survey::findByIdForUser($surveyId, $userId);

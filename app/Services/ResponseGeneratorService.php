@@ -14,7 +14,8 @@ class ResponseGeneratorService
 
     public function __construct()
     {
-        $this->ai = new AiService('gpt-4o');
+        $model = $_ENV['OPENAI_MODEL_GENERATOR'] ?? 'gpt-4o-mini';
+        $this->ai = new AiService($model);
     }
 
     /**

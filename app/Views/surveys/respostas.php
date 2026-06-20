@@ -41,10 +41,7 @@
                     <option value="100">100 respostas</option>
                 </select>
                 
-                <select name="strategy" class="rounded-md border border-[#e5e7eb] px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#6366f1] bg-white">
-                    <option value="hybrid">Híbrida (IA + Local)</option>
-                    <option value="local">Local (Custo Zero)</option>
-                </select>
+
 
                 <button type="submit" onclick="const btn = this; setTimeout(function(){ btn.disabled = true; btn.innerHTML = '<span class=\'animate-spin border-2 border-white border-t-transparent rounded-full w-3.5 h-3.5 mr-1.5 inline-block\'></span> Gerando...'; }, 10);"
                     class="inline-flex items-center justify-center rounded-md bg-[#6366f1] hover:bg-[#4f46e5] text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition">

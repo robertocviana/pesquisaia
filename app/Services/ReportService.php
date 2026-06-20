@@ -16,7 +16,8 @@ class ReportService
 
     public function __construct()
     {
-        $this->ai = new AiService('gpt-4o');
+        $model = $_ENV['OPENAI_MODEL_REPORT'] ?? 'gpt-4o';
+        $this->ai = new AiService($model);
     }
 
     /**
