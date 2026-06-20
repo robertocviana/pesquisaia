@@ -341,7 +341,7 @@ async function send() {
             .replace(/\n/g, '<br>');
 
         // Se as perguntas foram geradas, adicionar link para revisão
-        if (data.stage === 'finalizado' || data.questionsCount > 0) {
+        if (data.stage === 'finalizado') {
             msgHtml += `<br><br><a href="/pesquisas/revisao?id=${SURVEY_ID}" class="inline-flex items-center gap-1.5 mt-2 rounded-lg bg-[#6366f1] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition">Revisar e publicar →</a>`;
         }
 
