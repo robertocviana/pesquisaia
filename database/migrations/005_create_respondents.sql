@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `respondents` (
     `status`     ENUM('em_andamento','concluida') NOT NULL DEFAULT 'em_andamento',
     `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `respondents_token_unique` (`token`),
+    UNIQUE KEY `respondents_token_unique` (`survey_id`, `token`),
     KEY `respondents_survey_id_idx` (`survey_id`),
     CONSTRAINT `fk_respondents_survey`
         FOREIGN KEY (`survey_id`) REFERENCES `surveys` (`id`) ON DELETE CASCADE

@@ -163,7 +163,7 @@ FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE
 ```sql
 id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY
 survey_id       INT UNSIGNED NOT NULL
-token           VARCHAR(64) UNIQUE NOT NULL   -- UUID anônimo via cookie
+token           VARCHAR(64) NOT NULL          -- Identificador anônimo (único por survey_id: UNIQUE(survey_id, token))
 name            VARCHAR(150) DEFAULT NULL     -- Perguntado no início da conversa
 status          ENUM('em_andamento','concluida') DEFAULT 'em_andamento'
 created_at      DATETIME DEFAULT CURRENT_TIMESTAMP

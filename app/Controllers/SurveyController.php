@@ -61,6 +61,11 @@ class SurveyController
 
         // Buscar histórico do chat para renderizar na tela
         $history = \App\Models\Conversation::findBySurvey($surveyId);
+        if (empty($history)) {
+            $welcomeMessage = "Olá! Vou te ajudar a criar sua pesquisa.\n\n**Qual tipo de pesquisa você deseja fazer?**\n\nExemplos:\n• Validar uma ideia de negócio\n• Entender uma dor de clientes\n• Avaliar uma nova funcionalidade\n• Entender comportamento de usuários\n• Testar uma proposta de valor\n• Outro\n\nEscreva o tipo de pesquisa que você quer criar.";
+            \App\Models\Conversation::add($surveyId, 'assistant', $welcomeMessage);
+            $history = \App\Models\Conversation::findBySurvey($surveyId);
+        }
 
         // Determinar a etapa atual para o progresso inicial do JS
         $currentStage = $survey['current_stage'] ?? 'tipo';

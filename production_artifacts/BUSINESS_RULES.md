@@ -74,6 +74,7 @@ pesquisaia/
 
 ### 4.5 `respondents`
 - Identificação anônima por `token` (64 chars hex via `random_bytes(32)`)
+- Chave de unicidade composta: `(survey_id, token)`, permitindo que o mesmo cookie/respondente participe de diferentes pesquisas
 - Token armazenado em cookie `pesquisaia_token` (30 dias, httponly, samesite=Lax)
 - `status`: `em_andamento` | `concluida`
 - `name`: coletado como primeiro step do chat (opcional)

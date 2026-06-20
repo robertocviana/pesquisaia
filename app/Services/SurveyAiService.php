@@ -97,6 +97,13 @@ PROMPT;
      */
     public function chat(int $surveyId, string $userMessage): array
     {
+        // Garantir que a mensagem de boas-vindas do assistente existe antes da resposta do usuário
+        $history = Conversation::findBySurvey($surveyId);
+        if (empty($history)) {
+            $welcomeMessage = "Olá! Vou te ajudar a criar sua pesquisa.\n\n**Qual tipo de pesquisa você deseja fazer?**\n\nExemplos:\n• Validar uma ideia de negócio\n• Entender uma dor de clientes\n• Avaliar uma nova funcionalidade\n• Entender comportamento de usuários\n• Testar uma proposta de valor\n• Outro\n\nEscreva o tipo de pesquisa que você quer criar.";
+            Conversation::add($surveyId, 'assistant', $welcomeMessage);
+        }
+
         // Salvar mensagem do usuário
         Conversation::add($surveyId, 'user', $userMessage);
 
