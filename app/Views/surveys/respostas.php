@@ -9,7 +9,7 @@
     <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
             <h1 class="text-2xl font-semibold tracking-tight text-[#1e1b4b]">Respostas</h1>
-            <p class="text-sm text-[#6b7280] mt-1"><?= count($survey['responses']) ?> respostas em "<?= htmlspecialchars($survey['name']) ?>"</p>
+            <p class="text-sm text-[#6b7280] mt-1"><?= count($respondents) ?> respostas em "<?= htmlspecialchars($survey['name']) ?>"</p>
         </div>
     </div>
 
@@ -34,20 +34,23 @@
                 <tr>
                     <th class="text-left px-4 py-2.5 font-medium">Respondente</th>
                     <th class="text-left px-4 py-2.5 font-medium">Data</th>
-                    <th class="text-left px-4 py-2.5 font-medium">Tempo</th>
                     <th class="text-left px-4 py-2.5 font-medium">Status</th>
                     <th class="px-4 py-2.5"></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-[#e5e7eb]" id="responses-body">
-                <?php foreach ($survey['responses'] as $r): ?>
+                <?php foreach ($respondents as $r):
+                    $statusStyle = $r['status'] === 'concluida'
+                        ? 'bg-[#22c55e]/10 text-[#22c55e]'
+                        : 'bg-[#eab308]/10 text-[#713f12]';
+                    $statusLabel = $r['status'] === 'concluida' ? 'concluída' : 'em andamento';
+                ?>
                 <tr class="hover:bg-[#f3f4f6]/30 transition response-row">
-                    <td class="px-4 py-3 font-medium text-[#1e1b4b]"><?= htmlspecialchars($r['respondent']) ?></td>
-                    <td class="px-4 py-3 text-[#6b7280]"><?= \App\Helpers\MockData::formatDate($r['date']) ?></td>
-                    <td class="px-4 py-3 text-[#6b7280]"><?= $r['durationMin'] ?> min</td>
+                    <td class="px-4 py-3 font-medium text-[#1e1b4b]"><?= htmlspecialchars($r['name'] ?? 'Anônimo') ?></td>
+                    <td class="px-4 py-3 text-[#6b7280]"><?= date('d/m/Y H:i', strtotime($r['created_at'])) ?></td>
                     <td class="px-4 py-3">
-                        <span class="inline-flex items-center rounded-full bg-[#22c55e]/10 text-[#22c55e] px-2 py-0.5 text-xs font-medium capitalize">
-                            <?= htmlspecialchars($r['status']) ?>
+                        <span class="inline-flex items-center rounded-full <?= $statusStyle ?> px-2 py-0.5 text-xs font-medium capitalize">
+                            <?= $statusLabel ?>
                         </span>
                     </td>
                     <td class="px-4 py-3 text-right">
@@ -58,9 +61,9 @@
                     </td>
                 </tr>
                 <?php endforeach; ?>
-                <?php if (empty($survey['responses'])): ?>
+                <?php if (empty($respondents)): ?>
                 <tr>
-                    <td colspan="5" class="px-4 py-12 text-center text-[#6b7280]">
+                    <td colspan="4" class="px-4 py-12 text-center text-[#6b7280]">
                         Nenhuma resposta encontrada ainda.
                     </td>
                 </tr>
