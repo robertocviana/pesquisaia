@@ -33,6 +33,13 @@ class SurveyController
 
         $userId = Auth::id();
 
+        // Se o usuário quer criar explicitamente uma nova pesquisa, limpa a sessão e cria
+        if (isset($_GET['new'])) {
+            $_SESSION['current_survey_id'] = Survey::create($userId);
+            header('Location: /pesquisas/nova');
+            exit;
+        }
+
         // Criar pesquisa em rascunho se não houver uma em andamento
         if (empty($_SESSION['current_survey_id'])) {
             $_SESSION['current_survey_id'] = Survey::create($userId);
@@ -56,23 +63,7 @@ class SurveyController
         $history = \App\Models\Conversation::findBySurvey($surveyId);
 
         // Determinar a etapa atual para o progresso inicial do JS
-        $currentStage = 'objetivo';
-        if (empty($survey['objective'])) {
-            $currentStage = 'objetivo';
-        } elseif (empty($survey['audience'])) {
-            $currentStage = 'publico';
-        } elseif (empty($survey['name']) || $survey['name'] === 'Nova pesquisa') {
-            $currentStage = 'nome';
-        } elseif (empty($survey['goal_responses'])) {
-            $currentStage = 'meta';
-        } else {
-            $questions = \App\Models\Question::findBySurvey($surveyId);
-            if (empty($questions)) {
-                $currentStage = 'perguntas';
-            } else {
-                $currentStage = 'finalizado';
-            }
-        }
+        $currentStage = $survey['current_stage'] ?? 'tipo';
 
         require BASE_PATH . '/app/Views/surveys/nova.php';
     }

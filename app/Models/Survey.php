@@ -79,7 +79,7 @@ class Survey
     public static function create(int $userId): int
     {
         $stmt = Database::pdo()->prepare(
-            "INSERT INTO surveys (user_id, name, objective, status) VALUES (?, 'Nova pesquisa', '', 'rascunho')"
+            "INSERT INTO surveys (user_id, name, objective, status, current_stage) VALUES (?, 'Nova pesquisa', '', 'rascunho', 'tipo')"
         );
         $stmt->execute([$userId]);
         return (int) Database::pdo()->lastInsertId();
@@ -91,7 +91,7 @@ class Survey
         $fields = [];
         $params = [];
 
-        $allowed = ['name', 'objective', 'audience', 'goal_responses', 'deadline_at'];
+        $allowed = ['name', 'objective', 'audience', 'goal_responses', 'deadline_at', 'current_stage'];
         foreach ($allowed as $col) {
             if (array_key_exists($col, $data)) {
                 $fields[] = "`{$col}` = ?";

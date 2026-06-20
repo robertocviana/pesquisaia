@@ -8,7 +8,7 @@
             <h1 class="text-2xl font-semibold tracking-tight text-[#1e1b4b]">Olá, Ana 👋</h1>
             <p class="text-sm text-[#6b7280] mt-1">Aqui está um resumo das suas pesquisas.</p>
         </div>
-        <a href="/pesquisas/nova"
+        <a href="/pesquisas/nova?new=1"
            class="inline-flex items-center gap-2 rounded-lg bg-[#6366f1] px-4 py-2.5 text-sm font-medium text-white shadow-[0_20px_40px_-20px_rgb(99_102_241_/_0.35)] hover:opacity-90 transition">
             <i data-lucide="plus" class="w-4 h-4"></i> Nova pesquisa
         </a>

@@ -99,7 +99,8 @@ pesquisaia/
 - Rota `/logout` destroi sessão completamente
 
 ### FASE 2 — Criação de Pesquisa com IA
-- Ao acessar `/pesquisas/nova`, uma pesquisa em `rascunho` é criada automaticamente no banco e seu ID salvo em `$_SESSION['current_survey_id']`
+- Ao acessar `/pesquisas/nova?new=1` (ou se a sessão `current_survey_id` estiver vazia), uma nova pesquisa em `rascunho` é criada automaticamente no banco, seu ID é salvo em `$_SESSION['current_survey_id']`, e o usuário é redirecionado de volta para a rota limpa `/pesquisas/nova` (técnica Post-Redirect-Get para evitar duplicação no recarregamento de página/F5).
+- Acessar `/pesquisas/nova` sem parâmetros recupera o rascunho de pesquisa ativo da sessão.
 - O chat chama `POST /pesquisas/nova/chat` via AJAX com CSRF no header `X-CSRF-TOKEN`
 - A IA recebe o histórico completo de `conversations` a cada mensagem
 - A IA retorna JSON estruturado: `{message, stage, fields, questions}`

@@ -9,7 +9,7 @@
             </div>
             <span class="font-semibold text-[#1e1b4b]">PesquisaIA</span>
         </a>
-        <a href="/pesquisas/nova" class="mb-4 inline-flex items-center justify-center gap-2 rounded-lg bg-[#6366f1] px-3 py-2.5 text-sm font-medium text-white shadow-[0_20px_40px_-20px_rgb(99_102_241_/_0.35)] hover:opacity-90 transition">
+        <a href="/pesquisas/nova?new=1" class="mb-4 inline-flex items-center justify-center gap-2 rounded-lg bg-[#6366f1] px-3 py-2.5 text-sm font-medium text-white shadow-[0_20px_40px_-20px_rgb(99_102_241_/_0.35)] hover:opacity-90 transition">
             <i data-lucide="plus" class="w-4 h-4"></i> Nova pesquisa
         </a>
         <?php
@@ -59,7 +59,16 @@
                                 <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
                             </div>
                             <div class="text-sm leading-relaxed text-[#1e1b4b] pt-1">
-                                Olá! Vou te ajudar a criar sua pesquisa. Qual é o <strong>objetivo</strong> dela? O que você quer descobrir ou medir?
+                                Olá! Vou te ajudar a criar sua pesquisa.<br><br>
+                                <strong>Qual tipo de pesquisa você deseja fazer?</strong><br><br>
+                                Exemplos:<br>
+                                • Validar uma ideia de negócio<br>
+                                • Entender uma dor de clientes<br>
+                                • Avaliar uma nova funcionalidade<br>
+                                • Entender comportamento de usuários<br>
+                                • Testar uma proposta de valor<br>
+                                • Outro<br><br>
+                                Escreva o tipo de pesquisa que você quer criar.
                             </div>
                         </div>
                     <?php else: ?>
@@ -127,14 +136,23 @@
             </div>
 
             <div class="space-y-2" id="steps-list">
+                <div data-step="tipo" class="flex items-center gap-2.5 text-sm text-[#6b7280]">
+                    <span class="w-4 h-4 rounded-full border-2 border-[#9ca3af]"></span> Tipo de Pesquisa
+                </div>
                 <div data-step="objetivo" class="flex items-center gap-2.5 text-sm text-[#6b7280]">
                     <span class="w-4 h-4 rounded-full border-2 border-[#9ca3af]"></span> Objetivo
                 </div>
                 <div data-step="publico" class="flex items-center gap-2.5 text-sm text-[#6b7280]">
                     <span class="w-4 h-4 rounded-full border-2 border-[#9ca3af]"></span> Público-alvo
                 </div>
+                <div data-step="hipotese" class="flex items-center gap-2.5 text-sm text-[#6b7280]">
+                    <span class="w-4 h-4 rounded-full border-2 border-[#9ca3af]"></span> Hipóteses
+                </div>
                 <div data-step="perguntas" class="flex items-center gap-2.5 text-sm text-[#6b7280]">
                     <span class="w-4 h-4 rounded-full border-2 border-[#9ca3af]"></span> Perguntas
+                </div>
+                <div data-step="meta" class="flex items-center gap-2.5 text-sm text-[#6b7280]">
+                    <span class="w-4 h-4 rounded-full border-2 border-[#9ca3af]"></span> Encerramento
                 </div>
                 <div data-step="revisao" class="flex items-center gap-2.5 text-sm text-[#6b7280]">
                     <span class="w-4 h-4 rounded-full border-2 border-[#9ca3af]"></span> Revisão
@@ -215,26 +233,50 @@ function removeTypingIndicator() {
 }
 
 function updateProgress(stage) {
-    const stageOrder = ['objetivo', 'publico', 'nome', 'meta', 'perguntas', 'finalizado'];
-    const stepKeys   = ['objetivo', 'publico', 'perguntas', 'revisao'];
+    const stageOrder = [
+        'tipo', 
+        'objetivo', 
+        'publico', 
+        'hipotese', 
+        'perguntas_previas', 
+        'perguntas_sugeridas', 
+        'meta_encerramento', 
+        'revisao_chat', 
+        'finalizado'
+    ];
+    const stepKeys = ['tipo', 'objetivo', 'publico', 'hipotese', 'perguntas', 'meta', 'revisao'];
+
+    let currentStepIdx = 0;
+    if (stage === 'objetivo') currentStepIdx = 1;
+    else if (stage === 'publico') currentStepIdx = 2;
+    else if (stage === 'hipotese') currentStepIdx = 3;
+    else if (stage === 'perguntas_previas' || stage === 'perguntas_sugeridas') currentStepIdx = 4;
+    else if (stage === 'meta_encerramento') currentStepIdx = 5;
+    else if (stage === 'revisao_chat') currentStepIdx = 6;
+    else if (stage === 'finalizado') currentStepIdx = 7;
 
     const stageIdx = stageOrder.indexOf(stage);
-    const stepIdx  = Math.min(Math.floor(stageIdx / (stageOrder.length / stepKeys.length)), stepKeys.length);
+    const totalStages = stageOrder.length - 1;
+    const pct = Math.min(100, Math.round((stageIdx / totalStages) * 100));
 
-    const pct = Math.min(100, Math.round((stageIdx / (stageOrder.length - 1)) * 100));
     document.getElementById('progress-bar').style.width = pct + '%';
     document.getElementById('progress-label').textContent = pct + '%';
 
     stepKeys.forEach((key, i) => {
         const el = document.querySelector(`[data-step="${key}"]`);
         if (!el) return;
-        const label = el.textContent.replace(/[✓]/g, '').trim();
-        if (i < stepIdx) {
+        
+        let label = el.innerText.trim();
+        
+        if (i < currentStepIdx) {
             el.className = 'flex items-center gap-2.5 text-sm text-[#22c55e]';
             el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg> ${label}`;
-        } else if (i === stepIdx) {
+        } else if (i === currentStepIdx) {
             el.className = 'flex items-center gap-2.5 text-sm text-[#1e1b4b] font-medium';
             el.innerHTML = `<span class="w-4 h-4 rounded-full border-2 border-[#6366f1]"></span> ${label}`;
+        } else {
+            el.className = 'flex items-center gap-2.5 text-sm text-[#6b7280]';
+            el.innerHTML = `<span class="w-4 h-4 rounded-full border-2 border-[#9ca3af]"></span> ${label}`;
         }
     });
 

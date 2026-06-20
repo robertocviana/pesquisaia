@@ -9,8 +9,8 @@ use App\Models\Question;
 /**
  * SurveyAiService — Gerencia o fluxo conversacional de criação de pesquisa com IA.
  *
- * Possui modo fallback (sem IA) que guia o usuário pela coleta manual de dados
- * quando a API da OpenAI está indisponível (quota esgotada, chave inválida, etc).
+ * Guia o usuário passo a passo através de 8 etapas para consolidar um escopo
+ * de pesquisa de forma assistida.
  */
 class SurveyAiService
 {
@@ -27,40 +27,71 @@ class SurveyAiService
 Você é um assistente especializado em criar pesquisas conversacionais.
 Seu objetivo é coletar as informações necessárias para criar uma pesquisa de forma amigável e conversacional.
 
-Siga este fluxo OBRIGATÓRIO:
-1. Se ainda não tiver o OBJETIVO da pesquisa, pergunte sobre ele.
-2. Se ainda não tiver o PÚBLICO-ALVO, pergunte sobre ele.
-3. Se ainda não tiver o NOME da pesquisa, sugira um nome baseado no objetivo.
-4. Se ainda não tiver a META DE RESPOSTAS (quantidade desejada), pergunte (aceite "não definido").
-5. Quando tiver objetivo e público, GERE 4 a 6 perguntas abertas para a pesquisa.
-6. Quando as perguntas estiverem prontas, comunique ao usuário que está pronto para revisar.
+Siga este fluxo OBRIGATÓRIO de etapas, uma por uma, de forma estrita:
 
-REGRAS IMPORTANTES:
-- Seja amigável, objetivo e use português do Brasil.
-- Faça UMA pergunta por vez.
-- IMPORTANTE: Assim que você receber ou definir a META DE RESPOSTAS, você já terá coletado todos os dados obrigatórios (objetivo, público, nome, meta). Você deve gerar as 4 a 6 perguntas abertas IMEDIATAMENTE nessa mesma resposta! Defina o campo "stage" como "finalizado", preencha o array "questions" com as perguntas geradas e inclua-as de forma clara na "message" para o usuário revisar. Não divida isso em dois turnos.
-- Sempre retorne JSON com esta estrutura:
+1. tipo — Pergunte qual tipo de pesquisa o usuário deseja fazer. Apresente estes exemplos:
+   - Validar uma ideia de negócio
+   - Entender uma dor de clientes
+   - Avaliar uma nova funcionalidade
+   - Entender comportamento de usuários
+   - Testar uma proposta de valor
+   - Outro
+   Pergunte: "Qual tipo de pesquisa você quer criar?"
+
+2. objetivo — Pergunte qual é o objetivo principal da pesquisa. Pergunte: "O que você quer descobrir ou qual decisão você quer conseguir tomar com essa validação?"
+
+3. publico — Pergunte quem será o público entrevistado (as pessoas a serem ouvidas). IMPORTANTE: Você DEVE sugerir 2 ou 3 exemplos práticos de público-alvo baseando-se no objetivo informado pelo usuário na etapa anterior.
+
+4. hipotese — Pergunte qual é a hipótese principal que o usuário quer validar (o que ele acredita ser verdade hoje). Dê exemplos claros e curtos de hipóteses (por exemplo: "Empresários querem aprender IA, mas não sabem por onde começar"). Pergunte: "Qual é a principal hipótese que você quer validar?"
+
+5. perguntas_previas — Pergunte se o usuário já tem algumas perguntas específicas que deseja incluir na pesquisa. Se tiver, peça para ele enviar.
+
+6. perguntas_sugeridas — Se o usuário enviou perguntas prévias, valide-as. Sugira e elabore uma lista final de 4 a 6 perguntas da pesquisa (incluindo as prévias dele, se fizer sentido). Pergunte se ele deseja que você sugira mais algumas perguntas ou se ele prefere avançar.
+
+7. meta_encerramento — Pergunte sobre a meta de encerramento da pesquisa, explicando estas 3 opções de forma simples:
+   - Quantidade de respostas: A pesquisa encerra ao atingir um número de respostas (ex: 10 respostas).
+   - Data máxima: Encerra em um dia e horário específico (ex: 20/06/2026 às 10:00).
+   - Encerrar manualmente: O usuário clica para finalizar a qualquer momento (opção sempre disponível).
+   Pergunte qual dessas opções ele prefere definir.
+
+8. revisao_chat — Apresente um resumo detalhado e bem formatado em Markdown contendo:
+   - Tipo de pesquisa
+   - Objetivo principal
+   - Público-alvo
+   - Hipótese principal
+   - Perguntas da pesquisa (numeradas)
+   - Meta de encerramento
+   E pergunte se está tudo correto ou se deseja alterar alguma coisa.
+   IMPORTANTE: Se o usuário disser que quer alterar algo (ex: "mudar o público", "alterar a hipótese", "editar a pergunta 2"), você deve processar o ajuste solicitado, atualizar as informações e reapresentar o resumo atualizado na mesma resposta, perguntando novamente se está ok. Repita isso até que ele aprove.
+
+9. finalizado — Quando o usuário aprovar explicitamente o resumo (ex: "sim", "tudo certo", "está ótimo", "pode avançar"), sugira um título curto e atraente para a pesquisa (ex: "Pesquisa de Clima Organizacional", "Validação de Ideia IA", etc.) e preencha-o no campo "name" dentro de "fields". Defina o estágio como "finalizado" e informe ao usuário que a pesquisa está pronta para ser revisada na tela final.
+
+REGRAS DE CONDUÇÃO DA CONVERSA:
+- Seja amigável, acolhedor, profissional e use português do Brasil.
+- Faça apenas UMA pergunta por vez. Não acumule etapas em um único turno.
+- A cada interação, retorne obrigatoriamente um JSON válido com esta estrutura:
 
 {
-  "message": "Texto da sua resposta para o usuário",
-  "stage": "objetivo|publico|nome|meta|perguntas|finalizado",
+  "message": "Texto legível que será exibido para o usuário (pode conter markdown)",
+  "stage": "tipo|objetivo|publico|hipotese|perguntas_previas|perguntas_sugeridas|meta_encerramento|revisao_chat|finalizado",
   "fields": {
-    "name": "Nome da pesquisa (quando definido)",
-    "objective": "Objetivo (quando coletado)",
-    "audience": "Público-alvo (quando coletado)",
-    "goal_responses": null
+    "name": "Nome sugerido para a pesquisa (só preencher no final, no estágio finalizado)",
+    "objective": "Objetivo principal da pesquisa (uma vez coletado)",
+    "audience": "Público-alvo (uma vez coletado)",
+    "goal_responses": 10, // número de respostas se o encerramento for por quantidade (null se não houver ou for manual)
+    "deadline_at": "2026-06-20" // data formato YYYY-MM-DD se o encerramento for por data (null se não houver ou for manual)
   },
-  "questions": ["Pergunta 1", "Pergunta 2"]
+  "questions": ["Pergunta 1", "Pergunta 2"] // Lista de perguntas geradas. Só preencha a partir da etapa de perguntas_sugeridas
 }
 
-O campo "questions" só deve ser preenchido quando as perguntas forem geradas.
-O campo "fields" deve conter apenas os campos que JÁ foram coletados nesta conversa.
+O campo "questions" deve conter todas as perguntas sugeridas/definidas a partir da etapa 6.
+O campo "fields" deve conter os metadados da pesquisa coletados até o momento.
 PROMPT;
     }
 
     /**
      * Processa uma mensagem do usuário.
-     * Tenta a IA real; em caso de falha por quota/auth, ativa o modo fallback manual.
+     * Tenta a IA real; em caso de falha por quota/auth/rede, ativa o modo fallback manual (erro).
      *
      * @return array ['message', 'stage', 'fields', 'questions', 'questionsCount', 'fallback_mode']
      */
@@ -74,18 +105,12 @@ PROMPT;
             try {
                 return $this->callAi($surveyId, $userMessage);
             } catch (AiException $e) {
-                // Para quota e auth: ativar modo manual (problema de configuração, sem retry)
-                if ($e->isQuotaError() || $e->isAuthError()) {
-                    error_log('[PesquisaIA] AiService degraded: ' . $e->getErrorCode() . ' — ' . $e->getMessage());
-                    return $this->fallbackMode($surveyId, $userMessage, $e->getMessage());
-                }
-
-                // Para timeout/rede: relançar para o controller exibir mensagem de retry
-                throw $e;
+                error_log('[PesquisaIA] AiService degraded: ' . $e->getErrorCode() . ' — ' . $e->getMessage());
+                return $this->fallbackMode($surveyId, $userMessage, $e->getMessage());
             }
         }
 
-        // Sem chave configurada: modo manual direto
+        // Sem chave configurada: modo manual (erro de indisponibilidade)
         return $this->fallbackMode($surveyId, $userMessage, 'IA não configurada.');
     }
 
@@ -98,103 +123,32 @@ PROMPT;
             $messages[] = ['role' => $msg['role'], 'content' => $msg['content']];
         }
 
-        $raw  = $this->ai->complete($messages, jsonMode: true, maxTokens: 1500);
+        $raw  = $this->ai->complete($messages, jsonMode: true, maxTokens: 2000);
         $data = json_decode($raw, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $data = ['message' => $raw, 'stage' => 'objetivo', 'fields' => [], 'questions' => []];
+            $data = ['message' => $raw, 'stage' => 'tipo', 'fields' => [], 'questions' => []];
         }
 
         return $this->processAiResponse($surveyId, $data);
     }
 
     /**
-     * Modo fallback manual — coleta informações sem IA via fluxo determinístico.
-     * Analisa o histórico da conversa para saber em qual etapa o usuário está.
+     * Modo fallback manual — avisa que não é possível criar a pesquisa no momento.
      */
     private function fallbackMode(int $surveyId, string $userMessage, string $aiError): array
     {
-        $history  = Conversation::findBySurvey($surveyId);
-        $survey   = Survey::findById($surveyId);
+        $message = "⚠️ O assistente de criação de pesquisas com IA está temporariamente indisponível no momento.\n\nNão é possível criar uma pesquisa conversacional sem o assistente. Por favor, tente novamente mais tarde.";
 
-        // Contar turnos do usuário (excluindo a mensagem atual que acabou de ser adicionada)
-        $userTurns = count(array_filter($history, fn($h) => $h['role'] === 'user'));
-
-        // Determinar etapa pelo que já temos coletado
-        $hasObjective = !empty($survey['objective']);
-        $hasAudience  = !empty($survey['audience']);
-        $hasName      = !empty($survey['name']) && $survey['name'] !== 'Nova pesquisa';
-        $hasQuestions = count(Question::findBySurvey($surveyId)) > 0;
-
-        // ─── Processar a resposta do usuário para salvar no banco ───────────
-        $fields   = [];
-        $questions = [];
-        $stage    = 'objetivo';
-
-        if (!$hasObjective) {
-            // Primeira resposta = objetivo
-            $fields = ['objective' => $userMessage];
-            $stage  = 'publico';
-            $message = "✅ Objetivo registrado!\n\nPara quem é destinada esta pesquisa? (Ex: clientes da loja, funcionários, estudantes)";
-
-        } elseif (!$hasAudience) {
-            // Segunda resposta = público-alvo
-            $fields = ['audience' => $userMessage];
-            $stage  = 'nome';
-            $sugName = $this->suggestName($survey['objective']);
-            $fields['name'] = $sugName;
-            $message = "✅ Público registrado!\n\nSugestão de nome para a pesquisa: **\"{$sugName}\"**\n\nDeseja usar este nome ou quer mudar? (Responda com o nome que prefere ou \"ok\" para confirmar)";
-
-        } elseif (!$hasName) {
-            // Terceira resposta = nome
-            $nome    = (strtolower(trim($userMessage)) === 'ok') ? $survey['name'] : $userMessage;
-            $fields  = ['name' => $nome];
-            $stage   = 'meta';
-            $message = "✅ Nome definido: **\"{$nome}\"**\n\nQual é a meta de respostas? (Ex: 50, 100 — ou \"não definido\" para não ter limite)";
-
-        } elseif (!$hasQuestions) {
-            // Quarta resposta = meta + gerar perguntas
-            $goalRaw = strtolower(trim($userMessage));
-            $goal    = is_numeric($goalRaw) ? (int) $goalRaw : null;
-            if ($goal) $fields = ['goal_responses' => $goal];
-
-            // Gerar perguntas baseadas no objetivo e público
-            $questions = $this->generateQuestions($survey['objective'], $survey['audience'] ?? $userMessage);
-            $stage     = 'finalizado';
-
-            $qList   = implode("\n", array_map(fn($i, $q) => ($i+1).". {$q}", array_keys($questions), $questions));
-            $message = "✅ Perfeito! Gerei {count($questions)} perguntas para sua pesquisa:\n\n{$qList}\n\nClique em **Revisar e publicar** para ajustar as perguntas antes de publicar.";
-            $message = str_replace('{count($questions)}', (string) count($questions), $message);
-
-        } else {
-            // Pesquisa já completa
-            $stage   = 'finalizado';
-            $message = "Sua pesquisa já está pronta para publicação! 🎉 Clique em **Revisar e publicar** para ajustar as perguntas.";
-        }
-
-        // Salvar campos coletados no banco
-        if (!empty($fields)) {
-            $userId     = (int) ($_SESSION['user_id'] ?? 0);
-            $updateData = array_filter($fields);
-            if (!empty($updateData)) {
-                Survey::update($surveyId, $userId, $updateData);
-            }
-        }
-
-        // Salvar perguntas geradas
-        if (!empty($questions)) {
-            Question::createBatch($surveyId, array_values($questions));
-        }
-
-        // Salvar resposta no histórico
+        // Salvar a resposta no histórico do chat
         Conversation::add($surveyId, 'assistant', $message);
 
         return [
             'message'        => $message,
-            'stage'          => $stage,
-            'fields'         => $fields,
-            'questions'      => array_values($questions),
-            'questionsCount' => count($questions),
+            'stage'          => 'tipo',
+            'fields'         => [],
+            'questions'      => [],
+            'questionsCount' => 0,
             'fallback_mode'  => true,
             'fallback_reason' => $aiError,
         ];
@@ -204,40 +158,37 @@ PROMPT;
     private function processAiResponse(int $surveyId, array $data): array
     {
         $message   = $data['message']   ?? 'Desculpe, não entendi. Pode repetir?';
-        $stage     = $data['stage']     ?? 'objetivo';
+        $stage     = $data['stage']     ?? 'tipo';
         $fields    = $data['fields']    ?? [];
         $questions = $data['questions'] ?? [];
 
-        // Redundância / Safety Net: se a IA transitou para o estágio de perguntas/finalizado 
-        // mas o array de perguntas veio vazio, geramos as perguntas localmente usando o modo determinístico
-        // para que o usuário não fique preso na conversa sem botões/perguntas.
-        if (($stage === 'perguntas' || $stage === 'finalizado') && empty($questions)) {
-            $survey = Survey::findById($surveyId);
-            $objective = $fields['objective'] ?? $survey['objective'] ?? '';
-            $audience = $fields['audience'] ?? $survey['audience'] ?? '';
-            if (!empty($objective) && !empty($audience)) {
-                $questions = $this->generateQuestions($objective, $audience);
-                $stage = 'finalizado';
-                $qList = implode("\n", array_map(fn($i, $q) => ($i+1).". {$q}", array_keys($questions), $questions));
-                $message .= "\n\n(Gerado automaticamente):\n{$qList}";
-            }
-        }
-
         Conversation::add($surveyId, 'assistant', $message);
 
+        $updateData = [];
+
         if (!empty($fields)) {
-            $updateData = array_filter([
-                'name'           => $fields['name']           ?? null,
-                'objective'      => $fields['objective']      ?? null,
-                'audience'       => $fields['audience']       ?? null,
-                'goal_responses' => isset($fields['goal_responses']) && $fields['goal_responses']
-                    ? (int) $fields['goal_responses'] : null,
-            ]);
-            if (!empty($updateData)) {
-                $userId = (int) ($_SESSION['user_id'] ?? 0);
-                Survey::update($surveyId, $userId, $updateData);
+            if (isset($fields['name']) && !empty($fields['name'])) {
+                $updateData['name'] = $fields['name'];
+            }
+            if (isset($fields['objective']) && !empty($fields['objective'])) {
+                $updateData['objective'] = $fields['objective'];
+            }
+            if (isset($fields['audience']) && !empty($fields['audience'])) {
+                $updateData['audience'] = $fields['audience'];
+            }
+            if (array_key_exists('goal_responses', $fields)) {
+                $updateData['goal_responses'] = $fields['goal_responses'] ? (int) $fields['goal_responses'] : null;
+            }
+            if (array_key_exists('deadline_at', $fields)) {
+                $updateData['deadline_at'] = $fields['deadline_at'] ?: null;
             }
         }
+
+        // Atualizar o current_stage no banco
+        $updateData['current_stage'] = $stage;
+
+        $userId = (int) ($_SESSION['user_id'] ?? 0);
+        Survey::update($surveyId, $userId, $updateData);
 
         if (!empty($questions)) {
             Question::createBatch($surveyId, $questions);
@@ -250,54 +201,6 @@ PROMPT;
             'questions'      => $questions,
             'questionsCount' => count($questions),
             'fallback_mode'  => false,
-        ];
-    }
-
-    /** Sugere um nome baseado no objetivo da pesquisa. */
-    private function suggestName(string $objective): string
-    {
-        $obj = strtolower(trim($objective));
-
-        // Mapeamentos simples de palavras-chave → nomes sugeridos
-        $keywords = [
-            'satisfa' => 'Pesquisa de Satisfação',
-            'atendim' => 'Avaliação de Atendimento',
-            'produto' => 'Avaliação de Produto',
-            'serviço' => 'Avaliação de Serviço',
-            'func'    => 'Pesquisa de Clima Organizacional',
-            'client'  => 'Pesquisa de Satisfação de Clientes',
-            'event'   => 'Avaliação de Evento',
-            'treinam' => 'Avaliação de Treinamento',
-            'nps'     => 'Net Promoter Score',
-        ];
-
-        foreach ($keywords as $key => $name) {
-            if (str_contains($obj, $key)) {
-                return $name;
-            }
-        }
-
-        // Fallback: usar as primeiras 4 palavras do objetivo
-        $words = array_slice(explode(' ', ucwords($objective)), 0, 4);
-        return 'Pesquisa — ' . implode(' ', $words);
-    }
-
-    /**
-     * Gera perguntas abertas baseadas no objetivo e público (sem IA).
-     * Retorna 5 perguntas genéricas, mas contextualizadas.
-     */
-    private function generateQuestions(string $objective, string $audience): array
-    {
-        $obj = strtolower($objective);
-        $pub = strtolower($audience);
-
-        // Perguntas base que funcionam para qualquer pesquisa
-        return [
-            "Como você avalia sua experiência geral com {$objective}?",
-            "O que mais te agradou nesta experiência?",
-            "O que poderia ser melhorado?",
-            "Em uma escala de 0 a 10, qual a probabilidade de você recomendar para um amigo ou colega?",
-            "Tem mais algum comentário ou sugestão que gostaria de compartilhar?",
         ];
     }
 }
