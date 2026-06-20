@@ -1,6 +1,5 @@
 <?php
 $slug      = $_GET['slug'] ?? '';
-$questions = Question::findBySurvey((int) $survey['id']);
 $total     = count($questions);
 require BASE_PATH . '/app/Views/templates/header.php';
 ?>
