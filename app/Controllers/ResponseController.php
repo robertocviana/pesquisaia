@@ -56,6 +56,27 @@ class ResponseController
         }
 
         $answers     = Response::findByRespondent($rid);
+        $questions   = Question::findBySurvey($id);
+        $survey['questions'] = $questions;
+
+        $firstAnswer = reset($answers);
+        $lastAnswer  = end($answers);
+        $durationMin = 1;
+        if ($firstAnswer && $lastAnswer) {
+            $durationSeconds = strtotime($lastAnswer['answered_at']) - strtotime($firstAnswer['answered_at']);
+            $durationMin = max(1, (int) round($durationSeconds / 60));
+        }
+
+        $response = [
+            'respondent'  => $respondent['name'] ?: 'Respondente Anônimo',
+            'date'        => $respondent['created_at'],
+            'durationMin' => $durationMin,
+            'answers'     => array_map(fn($a) => [
+                'questionId' => (int) $a['question_id'],
+                'text'       => $a['text_response']
+            ], $answers)
+        ];
+
         $title       = 'Detalhe da resposta';
         $currentPath = '/pesquisas';
         $user        = Auth::user();
