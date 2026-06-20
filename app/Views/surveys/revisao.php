@@ -38,13 +38,13 @@
     <!-- Perguntas -->
     <section class="rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-[0_1px_2px_0_rgb(15_23_42_/_0.04)] mb-6">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="font-semibold text-[#1e1b4b]">Perguntas (<?= count($survey['questions']) ?>)</h2>
+            <h2 class="font-semibold text-[#1e1b4b]">Perguntas (<?= count($questions) ?>)</h2>
             <button class="inline-flex items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm hover:bg-[#f3f4f6] transition">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar pergunta
             </button>
         </div>
         <ul class="space-y-2" id="questions-list">
-            <?php foreach ($survey['questions'] as $i => $q): ?>
+            <?php foreach ($questions as $i => $q): ?>
             <li class="flex items-start gap-2 rounded-lg border border-[#e5e7eb] p-3 group">
                 <i data-lucide="grip-vertical" class="w-4 h-4 text-[#6b7280] mt-0.5 cursor-grab shrink-0"></i>
                 <span class="text-xs text-[#6b7280] mt-0.5 w-6 shrink-0"><?= $i + 1 ?>.</span>
