@@ -257,4 +257,26 @@ class SurveyController
             $service->exportCsv($id, $userId);
         }
     }
+
+    // ─── POST /pesquisas/excluir ─────────────────────────────────────────────
+    public function handleExcluir(): void
+    {
+        Auth::requireAuth();
+        Csrf::validate();
+
+        $userId = Auth::id();
+        $id     = (int) ($_POST['survey_id'] ?? 0);
+
+        $survey = Survey::findByIdForUser($id, $userId);
+        if ($survey) {
+            Survey::delete($id, $userId);
+
+            if (isset($_SESSION['current_survey_id']) && (int)$_SESSION['current_survey_id'] === $id) {
+                unset($_SESSION['current_survey_id']);
+            }
+        }
+
+        header('Location: /pesquisas');
+        exit;
+    }
 }

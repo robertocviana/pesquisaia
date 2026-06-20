@@ -175,4 +175,13 @@ class Survey
             self::closeById($id);
         }
     }
+
+    /** Exclui uma pesquisa e todos os seus dados vinculados. */
+    public static function delete(int $id, int $userId): void
+    {
+        $stmt = Database::pdo()->prepare(
+            'DELETE FROM surveys WHERE id = ? AND user_id = ?'
+        );
+        $stmt->execute([$id, $userId]);
+    }
 }

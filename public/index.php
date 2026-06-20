@@ -84,6 +84,10 @@ if ($uri === '/login') {
     $c = new \App\Controllers\SurveyController();
     $c->handleEncerrar();
 
+} elseif ($uri === '/pesquisas/excluir') {
+    $c = new \App\Controllers\SurveyController();
+    $c->handleExcluir();
+
 } elseif ($uri === '/pesquisas/relatorio') {
     $c = new \App\Controllers\SurveyController();
     $c->relatorio();

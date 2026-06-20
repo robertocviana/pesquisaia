@@ -75,9 +75,14 @@
                     <button title="Arquivar" class="p-2 rounded-lg border border-[#e5e7eb] bg-white hover:bg-[#f3f4f6] transition">
                         <i data-lucide="archive" class="w-4 h-4"></i>
                     </button>
-                    <button title="Excluir" class="p-2 rounded-lg border border-[#e5e7eb] bg-white hover:bg-[#f3f4f6] transition">
-                        <i data-lucide="trash-2" class="w-4 h-4 text-[#ef4444]"></i>
-                    </button>
+                    <form method="POST" action="/pesquisas/excluir" class="inline-flex"
+                          onsubmit="return confirm('Tem certeza que deseja excluir esta pesquisa? Esta ação é irreversível e excluirá todas as respostas vinculadas.')">
+                        <?= \App\Helpers\Csrf::field() ?>
+                        <input type="hidden" name="survey_id" value="<?= (int) $s['id'] ?>">
+                        <button type="submit" title="Excluir" class="p-2 rounded-lg border border-[#e5e7eb] bg-white hover:bg-[#f3f4f6] transition">
+                            <i data-lucide="trash-2" class="w-4 h-4 text-[#ef4444]"></i>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
