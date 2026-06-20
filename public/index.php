@@ -105,6 +105,10 @@ if ($uri === '/login') {
     $c = new \App\Controllers\ResponseController();
     $c->index();
 
+} elseif ($uri === '/pesquisas/respostas/gerar') {
+    $c = new \App\Controllers\ResponseController();
+    $c->handleGenerateResponses();
+
 } elseif ($uri === '/pesquisas/resposta') {
     $c = new \App\Controllers\ResponseController();
     $c->show();

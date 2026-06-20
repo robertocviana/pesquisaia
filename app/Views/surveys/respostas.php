@@ -6,11 +6,53 @@
         <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar à pesquisa
     </a>
 
-    <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+    <?php if (isset($flashError) && $flashError): ?>
+        <div class="mb-6 p-4 rounded-lg bg-red-50 text-red-700 text-sm border border-red-200 flex items-start gap-2.5 shadow-sm">
+            <i data-lucide="alert-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div><?= htmlspecialchars($flashError) ?></div>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($flashSuccess) && $flashSuccess): ?>
+        <div class="mb-6 p-4 rounded-lg bg-emerald-50 text-emerald-800 text-sm border border-emerald-200 flex items-start gap-2.5 shadow-sm">
+            <i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div><?= htmlspecialchars($flashSuccess) ?></div>
+        </div>
+    <?php endif; ?>
+
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
             <h1 class="text-2xl font-semibold tracking-tight text-[#1e1b4b]">Respostas</h1>
             <p class="text-sm text-[#6b7280] mt-1"><?= count($respondents) ?> respostas em "<?= htmlspecialchars($survey['name']) ?>"</p>
         </div>
+        
+        <?php if ($survey['status'] === 'ativa'): ?>
+        <div>
+            <form action="/pesquisas/respostas/gerar" method="POST" class="flex flex-wrap items-center gap-2 bg-white border border-[#e5e7eb] rounded-lg p-2 shadow-sm">
+                <?= \App\Helpers\Csrf::field() ?>
+                <input type="hidden" name="survey_id" value="<?= $survey['id'] ?>">
+                
+                <span class="text-xs text-[#6b7280] font-medium pl-1.5 hidden sm:inline">Simular:</span>
+                <select name="count" class="rounded-md border border-[#e5e7eb] px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#6366f1] bg-white">
+                    <option value="5">5 respostas</option>
+                    <option value="15" selected>15 respostas</option>
+                    <option value="30">30 respostas</option>
+                    <option value="50">50 respostas</option>
+                    <option value="100">100 respostas</option>
+                </select>
+                
+                <select name="strategy" class="rounded-md border border-[#e5e7eb] px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#6366f1] bg-white">
+                    <option value="hybrid">Híbrida (IA + Local)</option>
+                    <option value="local">Local (Custo Zero)</option>
+                </select>
+
+                <button type="submit" onclick="const btn = this; setTimeout(function(){ btn.disabled = true; btn.innerHTML = '<span class=\'animate-spin border-2 border-white border-t-transparent rounded-full w-3.5 h-3.5 mr-1.5 inline-block\'></span> Gerando...'; }, 10);"
+                    class="inline-flex items-center justify-center rounded-md bg-[#6366f1] hover:bg-[#4f46e5] text-white px-3 py-1.5 text-xs font-semibold shadow-sm transition">
+                    <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i> Gerar
+                </button>
+            </form>
+        </div>
+        <?php endif; ?>
     </div>
 
     <div class="rounded-xl border border-[#e5e7eb] bg-white shadow-[0_1px_2px_0_rgb(15_23_42_/_0.04)] overflow-hidden">

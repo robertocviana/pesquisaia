@@ -268,9 +268,54 @@ lando php database/migrate.php --seed   # Migrations + seeds
 | POST | `/pesquisas/relatorio/gerar` | SurveyController::handleRelatorioGerar |
 | GET | `/pesquisas/exportar?id=X&format=csv\|pdf` | SurveyController::exportar |
 | GET | `/pesquisas/respostas?id=X` | ResponseController::index |
+| POST | `/pesquisas/respostas/gerar` | ResponseController::handleGenerateResponses |
 | GET | `/pesquisas/resposta?id=X&rid=Y` | ResponseController::show |
 | GET | `/configuracoes` | SettingsController::index |
 | GET | `/r/{slug}` | RespondentController::intro |
 | GET | `/r/{slug}/chat` | RespondentController::chat |
 | GET | `/r/{slug}/concluido` | RespondentController::concluido |
 | POST | `/r/responder` | RespondentController::responder (AJAX) |
+
+---
+
+## 12. Gerador de Respostas de Pesquisa (Ferramenta de Teste)
+
+> **Implementado em:** 2026-06-20 — feat/gerador-respostas
+> **Objetivo:** Facilitar o teste da funcionalidade de geração de relatórios por IA, gerando dados fictícios coerentes para pesquisas ativas.
+
+### Regras de Negócio
+
+- **Pré-condição:** A pesquisa deve estar com status `ativa`. Pesquisas em `rascunho` ou `encerradas` são bloqueadas com erro.
+- **Limite por chamada:** De 1 a 100 respondentes por requisição. Validação no Controller antes de chamar o Service.
+- **Ownership obrigatório:** `Survey::findByIdForUser(id, userId)` garante tenant isolation antes de qualquer geração.
+- **Encerramento automático:** Após a geração, `Survey::checkAutoClose($surveyId)` é invocado — se o total gerado atingir `goal_responses`, a pesquisa é encerrada automaticamente.
+- **Respondentes marcados como `concluida`** com datas retroativas aleatórias (0 a 10 dias atrás) para que relatórios e listagens reflitam distribuição temporal natural.
+
+### Estratégias de Geração
+
+| Estratégia | Comportamento | Custo de API |
+|------------|---------------|--------------|
+| `hybrid` | Tenta IA para gerar 5 perfis ricos e contextualizados; fallback automático para `local` se a IA falhar | Cota OpenAI por chamada |
+| `local` | Gera 5 perfis determinísticos baseados em tons pré-definidos (entusiasta, crítico, neutro, detalhista, exigente), com mapeamento semântico por palavras-chave nas perguntas | Zero (sem custo) |
+
+- A estratégia selecionada pelo usuário é validada por **whitelist** no Controller (`in_array(['hybrid', 'local'])`).
+- Independente da estratégia, para cada respondente gerado, as respostas são sorteadas aleatoriamente entre os perfis base (cross-pollination), garantindo variedade mesmo com poucos perfis de template.
+
+### Arquitetura (MVC)
+
+- **Service:** `app/Services/ResponseGeneratorService.php` — toda a lógica de geração, chamada à IA e fallback local.
+- **Controller:** `app/Controllers/ResponseController::handleGenerateResponses()` — validações HTTP, CSRF, ownership, limites. Retorna redirect com flash message.
+- **View:** `app/Views/surveys/respostas.php` — botão "Gerar" com seletor de quantidade e estratégia, visível apenas para pesquisas `ativas`.
+- **Rota:** `POST /pesquisas/respostas/gerar`
+
+### Segurança
+
+| Proteção | Implementação |
+|----------|---------------|
+| Tenant Isolation | `Survey::findByIdForUser(id, userId)` antes de qualquer geração |
+| CSRF | `Csrf::validate()` no início do handler |
+| Whitelist de Strategy | `in_array(['hybrid', 'local'], true)` para evitar valores arbitrários |
+| Limite de contagem | `$count < 1 || $count > 100` antes de chamar o Service |
+| SQL Injection | PDO prepared statements com `?` em todos os INSERTs |
+| Sanitização da IA | Array de respondentes validado e sanitizado antes de ser usado |
+
