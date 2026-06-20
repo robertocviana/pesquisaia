@@ -61,7 +61,7 @@
                         </span>
                     </div>
                     <p class="text-sm text-[#6b7280] mt-1">
-                        <?= count($s['responses']) ?> respostas · criada em <?= \App\Helpers\MockData::formatDate($s['createdAt']) ?>
+                        <?= (int) $s['response_count'] ?> respostas · criada em <?= \App\Helpers\MockData::formatDate($s['created_at']) ?>
                     </p>
                 </div>
                 <div class="flex items-center gap-1.5">

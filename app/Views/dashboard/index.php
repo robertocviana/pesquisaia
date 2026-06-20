@@ -68,7 +68,7 @@
                         </span>
                     </div>
                     <div class="text-xs text-[#6b7280] mt-1">
-                        <?= count($s['responses']) ?> respostas · criada em <?= \App\Helpers\MockData::formatDate($s['createdAt']) ?>
+                        <?= (int) $s['response_count'] ?> respostas · criada em <?= \App\Helpers\MockData::formatDate($s['created_at']) ?>
                     </div>
                 </div>
                 <a href="/pesquisas/detalhe?id=<?= $s['id'] ?>" class="text-sm text-[#6366f1] hover:underline">
