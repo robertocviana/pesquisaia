@@ -84,6 +84,51 @@
         </div>
     </div>
 
+    <!-- Informações da Pesquisa -->
+    <div class="grid lg:grid-cols-3 gap-5 mb-6">
+        <!-- Planejamento (Objetivo, Público-alvo, Prazo) -->
+        <div class="lg:col-span-1 rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-[0_1px_2px_0_rgb(15_23_42_/_0.04)]">
+            <h3 class="font-semibold text-[#1e1b4b] mb-4">Planejamento</h3>
+            <div class="space-y-4">
+                <div>
+                    <span class="block text-xs font-semibold uppercase tracking-wider text-[#6b7280]">Objetivo</span>
+                    <p class="text-sm text-[#1e1b4b] mt-1 whitespace-pre-line"><?= htmlspecialchars($survey['objective']) ?: '<em>Não informado</em>' ?></p>
+                </div>
+                <hr class="border-[#e5e7eb]">
+                <div>
+                    <span class="block text-xs font-semibold uppercase tracking-wider text-[#6b7280]">Público-alvo</span>
+                    <p class="text-sm text-[#1e1b4b] mt-1"><?= htmlspecialchars($survey['audience']) ?: '<em>Não informado</em>' ?></p>
+                </div>
+                <hr class="border-[#e5e7eb]">
+                <div>
+                    <span class="block text-xs font-semibold uppercase tracking-wider text-[#6b7280]">Prazo Final</span>
+                    <p class="text-sm text-[#1e1b4b] mt-1">
+                        <?= $survey['deadline_at'] ? date('d/m/Y', strtotime($survey['deadline_at'])) : '<em>Sem prazo definido</em>' ?>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Perguntas Definidas -->
+        <div class="lg:col-span-2 rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-[0_1px_2px_0_rgb(15_23_42_/_0.04)]">
+            <h3 class="font-semibold text-[#1e1b4b] mb-4">Perguntas (<?= count($questions) ?>)</h3>
+            <?php if (empty($questions)): ?>
+                <p class="text-sm text-[#6b7280] italic">Nenhuma pergunta foi cadastrada nesta pesquisa.</p>
+            <?php else: ?>
+                <ul class="space-y-3">
+                    <?php foreach ($questions as $index => $q): ?>
+                        <li class="flex items-start gap-3 rounded-lg border border-[#e5e7eb] p-3.5 bg-[#fafafa]/50">
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#6366f1]/10 text-[#6366f1] text-xs font-semibold shrink-0 mt-0.5">
+                                <?= $index + 1 ?>
+                            </span>
+                            <span class="text-sm text-[#1e1b4b] font-medium leading-relaxed"><?= htmlspecialchars($q['text']) ?></span>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <!-- Ações -->
     <div class="flex flex-wrap gap-2">
         <a href="/pesquisas/respostas?id=<?= $survey['id'] ?>"
