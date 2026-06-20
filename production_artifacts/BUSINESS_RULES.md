@@ -319,3 +319,17 @@ lando php database/migrate.php --seed   # Migrations + seeds
 | SQL Injection | PDO prepared statements com `?` em todos os INSERTs |
 | Sanitização da IA | Array de respondentes validado e sanitizado antes de ser usado |
 
+---
+
+## 13. Duplicação de Pesquisas
+
+> **Implementado em:** 2026-06-20 — feat/duplicar-pesquisa
+> **Objetivo:** Permitir ao usuário clonar uma pesquisa (e todas as suas perguntas) e redirecioná-lo para a tela de revisão para validação antes de publicá-la.
+
+### Regras de Negócio
+- **Segurança e Tenant Isolation**: Só é possível duplicar pesquisas pertencentes ao próprio usuário (`Survey::findByIdForUser`).
+- **Estado Inicial**: A pesquisa duplicada é gerada com status `rascunho`, `current_stage = 'finalizado'`, `response_count = 0` e `public_slug = NULL`. Seu nome recebe o sufixo `" (Cópia)"`.
+- **Cópia de Perguntas**: Todas as perguntas associadas à pesquisa original são duplicadas mantendo os textos e a ordenação (`order_index`).
+- **Atomicidade**: Todo o processo de criação da nova pesquisa e cópia das perguntas é executado sob uma transação SQL (`beginTransaction()`).
+- **Redirecionamento**: O usuário é redirecionado diretamente para `/pesquisas/revisao?id=NEW_ID`.
+

@@ -176,6 +176,54 @@ class Survey
         }
     }
 
+    /**
+     * Duplica uma pesquisa existente e todas as suas perguntas.
+     * Retorna o ID da nova pesquisa duplicada.
+     */
+    public static function duplicate(int $id, int $userId): int
+    {
+        $original = self::findByIdForUser($id, $userId);
+        if (!$original) {
+            throw new \InvalidArgumentException("Pesquisa não encontrada ou acesso negado.");
+        }
+
+        $db = Database::pdo();
+        $db->beginTransaction();
+
+        try {
+            // 1. Inserir a nova pesquisa duplicada
+            $newName = $original['name'] . ' (Cópia)';
+            $stmt = $db->prepare(
+                "INSERT INTO surveys (user_id, name, objective, audience, status, current_stage, goal_responses, deadline_at)
+                 VALUES (?, ?, ?, ?, 'rascunho', 'finalizado', ?, ?)"
+            );
+            $stmt->execute([
+                $userId,
+                $newName,
+                $original['objective'],
+                $original['audience'],
+                $original['goal_responses'],
+                $original['deadline_at']
+            ]);
+            $newId = (int)$db->lastInsertId();
+
+            // 2. Copiar as perguntas
+            $questions = Question::findBySurvey($id);
+            foreach ($questions as $q) {
+                $stmtQ = $db->prepare(
+                    "INSERT INTO questions (survey_id, text, order_index) VALUES (?, ?, ?)"
+                );
+                $stmtQ->execute([$newId, $q['text'], $q['order_index']]);
+            }
+
+            $db->commit();
+            return $newId;
+        } catch (\Exception $e) {
+            $db->rollBack();
+            throw $e;
+        }
+    }
+
     /** Exclui uma pesquisa e todos os seus dados vinculados. */
     public static function delete(int $id, int $userId): void
     {

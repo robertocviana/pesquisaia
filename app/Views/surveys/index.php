@@ -2,6 +2,20 @@
 <?php require BASE_PATH . '/app/Views/templates/sidebar.php'; ?>
 
 <div class="max-w-6xl mx-auto p-6 sm:p-10">
+    <?php if (isset($flashError) && $flashError): ?>
+        <div class="mb-6 p-4 rounded-lg bg-red-50 text-red-700 text-sm border border-red-200 flex items-start gap-2.5 shadow-sm">
+            <i data-lucide="alert-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div><?= htmlspecialchars($flashError) ?></div>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($flashSuccess) && $flashSuccess): ?>
+        <div class="mb-6 p-4 rounded-lg bg-emerald-50 text-emerald-800 text-sm border border-emerald-200 flex items-start gap-2.5 shadow-sm">
+            <i data-lucide="check-circle-2" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div><?= htmlspecialchars($flashSuccess) ?></div>
+        </div>
+    <?php endif; ?>
+
     <!-- Page Header -->
     <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
@@ -69,9 +83,13 @@
                        class="inline-flex items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3 py-1.5 text-sm hover:bg-[#f3f4f6] transition">
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Abrir
                     </a>
-                    <button title="Duplicar" class="p-2 rounded-lg border border-[#e5e7eb] bg-white hover:bg-[#f3f4f6] transition">
-                        <i data-lucide="copy" class="w-4 h-4"></i>
-                    </button>
+                    <form method="POST" action="/pesquisas/duplicar" class="inline-flex">
+                        <?= \App\Helpers\Csrf::field() ?>
+                        <input type="hidden" name="survey_id" value="<?= (int) $s['id'] ?>">
+                        <button type="submit" title="Duplicar" class="p-2 rounded-lg border border-[#e5e7eb] bg-white hover:bg-[#f3f4f6] transition">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                    </form>
                     <button title="Arquivar" class="p-2 rounded-lg border border-[#e5e7eb] bg-white hover:bg-[#f3f4f6] transition">
                         <i data-lucide="archive" class="w-4 h-4"></i>
                     </button>

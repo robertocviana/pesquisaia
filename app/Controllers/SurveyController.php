@@ -17,11 +17,14 @@ class SurveyController
     {
         Auth::requireAuth();
 
-        $userId      = Auth::id();
-        $surveys     = Survey::findByUser($userId);
-        $title       = 'Minhas Pesquisas';
-        $currentPath = '/pesquisas';
-        $user        = Auth::user();
+        $userId       = Auth::id();
+        $surveys      = Survey::findByUser($userId);
+        $title        = 'Minhas Pesquisas';
+        $currentPath  = '/pesquisas';
+        $user         = Auth::user();
+        $flashError   = $_SESSION['flash_error'] ?? null;
+        $flashSuccess = $_SESSION['flash_success'] ?? null;
+        unset($_SESSION['flash_error'], $_SESSION['flash_success']);
 
         require BASE_PATH . '/app/Views/surveys/index.php';
     }
@@ -260,6 +263,28 @@ class SurveyController
             $service->exportPdf($id, $userId);
         } else {
             $service->exportCsv($id, $userId);
+        }
+    }
+
+    // ─── POST /pesquisas/duplicar ────────────────────────────────────────────
+    public function handleDuplicar(): void
+    {
+        Auth::requireAuth();
+        Csrf::validate();
+
+        $userId = Auth::id();
+        $id     = (int) ($_POST['survey_id'] ?? 0);
+
+        try {
+            $newId = Survey::duplicate($id, $userId);
+            $_SESSION['current_survey_id'] = $newId;
+            $_SESSION['flash_success'] = 'Pesquisa duplicada com sucesso!';
+            header('Location: /pesquisas/revisao?id=' . $newId);
+            exit;
+        } catch (\Exception $e) {
+            $_SESSION['flash_error'] = 'Erro ao duplicar pesquisa: ' . $e->getMessage();
+            header('Location: /pesquisas');
+            exit;
         }
     }
 
