@@ -333,3 +333,30 @@ lando php database/migrate.php --seed   # Migrations + seeds
 - **Atomicidade**: Todo o processo de criação da nova pesquisa e cópia das perguntas é executado sob uma transação SQL (`beginTransaction()`).
 - **Redirecionamento**: O usuário é redirecionado diretamente para `/pesquisas/revisao?id=NEW_ID`.
 
+---
+
+## 14. Redesign UX — Chat do Respondente (One-Question-at-a-Time)
+
+> **Implementado em:** 2026-06-21 — feat/chat-respondente-ux
+> **Objetivo:** Melhorar a experiência do respondente, especialmente em mobile, transformando o chat contínuo em fluxo de perguntas sequenciais estilo "typeform".
+
+### Mudanças de Comportamento
+
+| Antes | Depois |
+|-------|--------|
+| Histórico de chat visível (bolhas acumulam) | Uma pergunta por vez — foco total na resposta |
+| Progresso some ao rolar | Barra de progresso sempre visível no topo |
+| Botão de envio some quando teclado abre | Input + botão em zona fixa, nunca some |
+| Layout não considera teclado virtual iOS | `height: 100dvh` + `env(safe-area-inset-bottom)` |
+
+### Layout de 3 Zonas Fixas
+
+1. **Header (topo fixo):** Nome da pesquisa + "Pergunta X de N" + barra de progresso integrada
+2. **Zona central:** Pergunta com tipografia grande (`clamp(1.25rem, 4vw, 2rem)`), animação slide/fade entre perguntas (350ms cubic-bezier)
+3. **Input zone (fundo fixo):** Textarea auto-resize + botão de enviar — nunca some no mobile
+
+### Arquivo Modificado
+
+- **`app/Views/respondent/chat.php`** — substituição completa (HTML/CSS/JS)
+- Nenhum Controller, Model, rota ou banco de dados alterado
+- Compatibilidade retroativa total com AJAX `/r/responder` e sessão de respondentes

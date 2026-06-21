@@ -1,172 +1,568 @@
 <?php
-$slug      = $_GET['slug'] ?? '';
-$total     = count($questions);
+$slug  = $_GET['slug'] ?? '';
+$total = count($questions);
 require BASE_PATH . '/app/Views/templates/header.php';
 ?>
 
-<div class="min-h-screen flex flex-col bg-[#f3f4f6]/30">
-    <!-- Header -->
-    <header class="bg-white border-b border-[#e5e7eb] px-5 py-3 flex items-center gap-3 shrink-0">
-        <div class="w-9 h-9 rounded-full bg-[#6366f1] flex items-center justify-center">
-            <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+<style>
+    /* ── Dynamic viewport: accounts for mobile soft keyboard ─────────────── */
+    :root {
+        --header-h: 64px;
+        --input-h: 76px;
+        --indigo: #6366f1;
+        --indigo-soft: #eef2ff;
+        --indigo-dark: #4338ca;
+        --text: #1e1b4b;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --bg: #fafafa;
+    }
+
+    html, body {
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg);
+    }
+
+    /* ── Layout shell: 3 fixed zones ─────────────────────────────────────── */
+    #survey-shell {
+        display: flex;
+        flex-direction: column;
+        height: 100dvh; /* dynamic viewport — respects soft keyboard */
+        overflow: hidden;
+    }
+
+    /* ── Zone 1: Header + Progress (fixed top) ───────────────────────────── */
+    #survey-header {
+        flex-shrink: 0;
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+        padding: 0 20px;
+        height: var(--header-h);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 8px;
+        z-index: 10;
+    }
+
+    #header-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    #header-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    #header-brand .brand-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        background: var(--indigo);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    #header-brand .brand-name {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 160px;
+    }
+
+    #step-counter {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    #progress-track {
+        height: 4px;
+        background: var(--border);
+        border-radius: 99px;
+        overflow: hidden;
+    }
+
+    #progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--indigo), var(--indigo-dark));
+        border-radius: 99px;
+        transition: width 500ms cubic-bezier(0.4, 0, 0.2, 1);
+        width: 0%;
+    }
+
+    /* ── Zone 2: Question stage (flex-grow, centred) ─────────────────────── */
+    #question-stage {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 24px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    #question-card {
+        max-width: 560px;
+        width: 100%;
+        text-align: center;
+        will-change: transform, opacity;
+        transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity  350ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #question-card.exit-left {
+        transform: translateX(-48px);
+        opacity: 0;
+    }
+
+    #question-card.enter-right {
+        transform: translateX(48px);
+        opacity: 0;
+    }
+
+    #question-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--indigo);
+        background: var(--indigo-soft);
+        padding: 4px 12px;
+        border-radius: 99px;
+        margin-bottom: 20px;
+    }
+
+    #question-text {
+        font-size: clamp(1.25rem, 4vw, 2rem);
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1.4;
+        letter-spacing: -0.02em;
+    }
+
+    /* Idle dots while transitioning */
+    #loading-dots {
+        display: none;
+        gap: 6px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #loading-dots.visible {
+        display: flex;
+    }
+
+    #loading-dots span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--indigo);
+        animation: bounce-dot 1.2s infinite ease-in-out;
+    }
+
+    #loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    #loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce-dot {
+        0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+        40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ── Zone 3: Input (fixed bottom) ────────────────────────────────────── */
+    #input-zone {
+        flex-shrink: 0;
+        background: #fff;
+        border-top: 1px solid var(--border);
+        padding: 12px 16px;
+        /* Safe area for iPhone notch / home bar */
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+        z-index: 10;
+    }
+
+    #input-row {
+        max-width: 560px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #chat-input {
+        flex: 1;
+        resize: none;
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-size: 0.9375rem;
+        font-family: inherit;
+        color: var(--text);
+        background: #fff;
+        outline: none;
+        line-height: 1.5;
+        max-height: 120px;
+        overflow-y: auto;
+        transition: border-color 200ms;
+    }
+
+    #chat-input:focus {
+        border-color: var(--indigo);
+    }
+
+    #chat-input:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    #chat-send {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        border-radius: 14px;
+        background: var(--indigo);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        transition: opacity 150ms, transform 150ms;
+        /* Always visible — never hidden */
+    }
+
+    #chat-send:hover:not(:disabled) {
+        opacity: 0.88;
+        transform: scale(1.04);
+    }
+
+    #chat-send:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    #chat-send .spinner {
+        display: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    #chat-send.loading .send-icon { display: none; }
+    #chat-send.loading .spinner    { display: block; }
+
+    /* ── Respect prefers-reduced-motion ──────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+        #question-card,
+        #progress-fill {
+            transition: none !important;
+        }
+        #loading-dots span {
+            animation: none !important;
+            opacity: 0.6;
+        }
+    }
+</style>
+
+<div id="survey-shell">
+
+    <!-- Zone 1 · Header + Progress ---------------------------------------- -->
+    <header id="survey-header">
+        <div id="header-meta">
+            <div id="header-brand">
+                <div class="brand-icon">
+                    <i data-lucide="sparkles" style="width:15px;height:15px;color:#fff;"></i>
+                </div>
+                <span class="brand-name"><?= htmlspecialchars($survey['name']) ?></span>
+            </div>
+            <span id="step-counter">Iniciando...</span>
         </div>
-        <div class="flex-1 min-w-0">
-            <div class="font-semibold text-sm text-[#1e1b4b] truncate"><?= htmlspecialchars($survey['name']) ?></div>
-            <div id="question-counter" class="text-xs text-[#6b7280]">Iniciando...</div>
+        <div id="progress-track">
+            <div id="progress-fill"></div>
         </div>
     </header>
 
-    <!-- Barra de progresso -->
-    <div class="h-1 bg-[#e5e7eb] shrink-0">
-        <div id="progress-bar" class="h-full bg-[#6366f1] transition-all" style="width:0%"></div>
-    </div>
+    <!-- Zone 2 · Question stage -------------------------------------------- -->
+    <main id="question-stage">
+        <div id="question-card">
+            <div id="question-label">
+                <i data-lucide="message-circle" style="width:11px;height:11px;"></i>
+                <span id="label-text">Pesquisa</span>
+            </div>
+            <p id="question-text">Carregando...</p>
+            <div id="loading-dots">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </main>
 
-    <!-- Mensagens -->
-    <div id="chat-scroll" class="flex-1 overflow-y-auto p-4">
-        <div class="max-w-xl mx-auto space-y-3" id="messages-container"></div>
-        <div id="chat-end"></div>
-    </div>
-
-    <!-- Input -->
-    <div class="border-t border-[#e5e7eb] bg-white p-3 shrink-0">
-        <div class="max-w-xl mx-auto flex items-end gap-2">
-            <textarea id="chat-input" rows="1" placeholder="Digite sua resposta..."
-                class="flex-1 resize-none rounded-full border border-[#e5e7eb] bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#6366f1]"></textarea>
-            <button id="chat-send" class="rounded-full bg-[#6366f1] p-3 text-white hover:opacity-90 transition">
-                <i data-lucide="send" class="w-4 h-4"></i>
+    <!-- Zone 3 · Input (always visible, fixed to bottom of shell) ---------- -->
+    <div id="input-zone">
+        <div id="input-row">
+            <textarea
+                id="chat-input"
+                rows="1"
+                placeholder="Digite sua resposta..."
+                aria-label="Campo de resposta"
+            ></textarea>
+            <button id="chat-send" aria-label="Enviar resposta">
+                <i data-lucide="send" class="send-icon" style="width:18px;height:18px;"></i>
+                <div class="spinner"></div>
             </button>
         </div>
     </div>
+
 </div>
 
 <script>
 lucide.createIcons();
 
-const SURVEY_SLUG = '<?= htmlspecialchars($slug) ?>';
-const SURVEY_ID   = <?= (int) $survey['id'] ?>;
+/* ── Constants injected from PHP ─────────────────────────────────────────── */
+const SURVEY_SLUG   = '<?= htmlspecialchars($slug) ?>';
 const RESPONDENT_ID = <?= (int) ($respondent['id'] ?? 0) ?>;
+const questions     = <?= json_encode(array_values(array_map(
+    fn($q) => ['id' => (int)$q['id'], 'text' => $q['text']],
+    $questions
+))) ?>;
+const total         = questions.length;
+const answered      = <?= (int) ($answered ?? 0) ?>;
 
-const questions = <?= json_encode(array_values(array_map(fn($q) => ['id' => (int)$q['id'], 'text' => $q['text']], $questions))) ?>;
-const total     = questions.length;
-const answered  = <?= (int) ($answered ?? 0) ?>;
-
-// Descobrir a primeira pergunta não respondida
-let step = answered;
-
-// Controle de nome
+/* ── State ───────────────────────────────────────────────────────────────── */
+let step          = answered;                                    // current question index
 let nameCollected = <?= ($respondent['name'] ? 'true' : 'false') ?>;
 let pendingName   = false;
+let isTransitioning = false;
 
-function scrollToEnd() {
-    document.getElementById('chat-end').scrollIntoView({ behavior: 'smooth' });
-}
+/* ── DOM refs ────────────────────────────────────────────────────────────── */
+const $input    = document.getElementById('chat-input');
+const $send     = document.getElementById('chat-send');
+const $card     = document.getElementById('question-card');
+const $qText    = document.getElementById('question-text');
+const $qLabel   = document.getElementById('label-text');
+const $dots     = document.getElementById('loading-dots');
+const $counter  = document.getElementById('step-counter');
+const $progress = document.getElementById('progress-fill');
 
-function addMessage(role, text) {
-    const container = document.getElementById('messages-container');
-    const div = document.createElement('div');
-    if (role === 'assistant') {
-        div.className = 'flex justify-start';
-        div.innerHTML = `<div class="max-w-[80%] rounded-2xl rounded-tl-sm bg-white border border-[#e5e7eb] px-4 py-2.5 text-sm shadow-[0_1px_2px_0_rgb(15_23_42_/_0.04)] text-[#1e1b4b]">${text}</div>`;
+/* ── Auto-resize textarea ────────────────────────────────────────────────── */
+$input.addEventListener('input', () => {
+    $input.style.height = 'auto';
+    $input.style.height = Math.min($input.scrollHeight, 120) + 'px';
+});
+
+/* ── UI helpers ──────────────────────────────────────────────────────────── */
+function updateProgress(s) {
+    const pct = total > 0 ? Math.min(100, Math.round((s / total) * 100)) : 0;
+    $progress.style.width = pct + '%';
+    if (s < total) {
+        $counter.textContent = `Pergunta ${s + 1} de ${total}`;
     } else {
-        div.className = 'flex justify-end';
-        div.innerHTML = `<div class="max-w-[80%] rounded-2xl rounded-tr-sm bg-[#6366f1] px-4 py-2.5 text-sm text-white">${text}</div>`;
+        $counter.textContent = 'Concluindo...';
     }
-    container.appendChild(div);
-    scrollToEnd();
 }
 
-function updateProgress(currentStep) {
-    const pct = total > 0 ? Math.min(100, Math.round((currentStep / total) * 100)) : 0;
-    document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('question-counter').textContent =
-        currentStep < total ? `Pergunta ${currentStep + 1} de ${total}` : 'Concluindo...';
+function setLoading(on) {
+    $send.classList.toggle('loading', on);
+    $send.disabled  = on;
+    $input.disabled = on;
 }
 
-async function saveAnswer(questionId, text, name = null) {
+function showDots(on) {
+    $dots.classList.toggle('visible', on);
+    $qText.style.display = on ? 'none' : '';
+}
+
+/**
+ * Display a new question with a slide-in animation.
+ * @param {string} text  - Question text to display
+ * @param {string} label - Badge label (e.g. "Pergunta 2")
+ */
+function revealQuestion(text, label) {
+    return new Promise(resolve => {
+        $qLabel.textContent = label;
+        $qText.textContent  = text;
+        showDots(false);
+
+        // Start off-screen right
+        $card.classList.add('enter-right');
+        $card.style.opacity   = '0';
+        $card.style.transform = 'translateX(48px)';
+
+        // Force reflow so transition fires
+        $card.getBoundingClientRect();
+
+        $card.classList.remove('enter-right');
+        $card.style.opacity   = '';
+        $card.style.transform = '';
+
+        $card.addEventListener('transitionend', () => resolve(), { once: true });
+
+        // Fallback in case transition doesn't fire (e.g. prefers-reduced-motion)
+        setTimeout(resolve, 400);
+    });
+}
+
+/**
+ * Slide out the current question to the left.
+ */
+function exitQuestion() {
+    return new Promise(resolve => {
+        $card.style.transform = 'translateX(-48px)';
+        $card.style.opacity   = '0';
+        $card.addEventListener('transitionend', () => resolve(), { once: true });
+        setTimeout(resolve, 400);
+    });
+}
+
+/* ── API: save answer via AJAX ───────────────────────────────────────────── */
+async function saveAnswer(questionId, answer, name = null) {
     try {
         await fetch('/r/responder', {
-            method: 'POST',
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+            body:    JSON.stringify({
                 slug:        SURVEY_SLUG,
                 question_id: questionId,
-                answer:      text,
-                name:        name,
+                answer,
+                name,
             }),
         });
-    } catch (e) {
-        console.error('Erro ao salvar resposta:', e);
+    } catch (err) {
+        console.error('[PesquisaIA] Erro ao salvar resposta:', err);
     }
+}
+
+/* ── Core flow ───────────────────────────────────────────────────────────── */
+async function askQuestion(s) {
+    if (s >= total) return;
+
+    const q     = questions[s];
+    const label = `Pergunta ${s + 1} de ${total}`;
+
+    await revealQuestion(q.text, label);
+    updateProgress(s);
+
+    // Re-focus input after animation for smooth mobile experience
+    setTimeout(() => $input.focus(), 50);
+    isTransitioning = false;
+}
+
+async function askNameQuestion() {
+    await revealQuestion(
+        'Olá! Obrigado por participar 😊 Antes de começar, qual é o seu nome?',
+        'Boas-vindas'
+    );
+    updateProgress(0);
+    setTimeout(() => $input.focus(), 50);
+    isTransitioning = false;
 }
 
 async function send() {
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
+    if (isTransitioning) return;
+
+    const text = $input.value.trim();
     if (!text) return;
-    input.value = '';
-    input.disabled = true;
 
-    addMessage('user', text);
+    isTransitioning = true;
+    setLoading(true);
 
-    // Coletar nome primeiro
+    // --- Handle name collection ---
     if (!nameCollected && pendingName) {
         nameCollected = true;
         pendingName   = false;
-        await saveAnswer(0, '', text); // Salvar nome
-        setTimeout(askQuestion, 500);
-        input.disabled = false;
+        await saveAnswer(0, '', text);  // name stored separately
+
+        setLoading(false);
+        await exitQuestion();
+        showDots(true);
+
+        await new Promise(r => setTimeout(r, 300));
+        $input.value  = '';
+        $input.style.height = 'auto';
+
+        await askQuestion(step);
         return;
     }
 
-    // Salvar resposta da pergunta atual
+    // --- Handle survey question ---
     if (step < total) {
         await saveAnswer(questions[step].id, text);
         step++;
     }
 
-    updateProgress(step);
+    setLoading(false);
+    $input.value = '';
+    $input.style.height = 'auto';
 
     if (step >= total) {
-        // Finalizar
-        addMessage('assistant', 'Obrigado pelas suas respostas! 🎉');
+        // Survey complete
+        await exitQuestion();
+        $qLabel.textContent = '🎉 Concluído';
+        $qText.textContent  = 'Obrigado pelas suas respostas! Isso significa muito para nós.';
+        await revealQuestion(
+            'Obrigado pelas suas respostas! Isso significa muito para nós. 🎉',
+            'Concluído'
+        );
+        updateProgress(step);
+
         setTimeout(() => {
             window.location.href = '/r/' + SURVEY_SLUG + '/concluido';
-        }, 1500);
+        }, 1800);
     } else {
-        setTimeout(askQuestion, 500);
-    }
-
-    input.disabled = false;
-}
-
-function askQuestion() {
-    if (step < total) {
-        addMessage('assistant', questions[step].text);
-        updateProgress(step);
+        await exitQuestion();
+        showDots(true);
+        await new Promise(r => setTimeout(r, 250));
+        await askQuestion(step);
     }
 }
 
-// Iniciar conversa
-if (total > 0) {
-    setTimeout(() => {
-        if (!nameCollected) {
-            addMessage('assistant', 'Olá! Obrigado por participar 😊 Antes de começar, qual é o seu nome?');
-            pendingName = true;
-        } else {
-            addMessage('assistant', 'Olá! Obrigado por participar 😊 Vamos começar!');
-            setTimeout(askQuestion, 800);
-        }
-    }, 400);
-} else {
-    addMessage('assistant', 'Esta pesquisa ainda não tem perguntas.');
-}
+/* ── Event listeners ─────────────────────────────────────────────────────── */
+$send.addEventListener('click', send);
 
-document.getElementById('chat-send').addEventListener('click', send);
-document.getElementById('chat-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+$input.addEventListener('keydown', (e) => {
+    // Enter sends on desktop; Shift+Enter = new line
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        send();
+    }
 });
 
-updateProgress(step);
+/* ── Bootstrap ───────────────────────────────────────────────────────────── */
+if (total > 0) {
+    updateProgress(step);
+
+    if (!nameCollected) {
+        pendingName = true;
+        // Small delay for smooth entrance on page load
+        setTimeout(askNameQuestion, 400);
+    } else {
+        setTimeout(() => askQuestion(step), 400);
+    }
+} else {
+    revealQuestion('Esta pesquisa ainda não tem perguntas configuradas.', 'Atenção');
+}
 </script>
 </body>
 </html>
