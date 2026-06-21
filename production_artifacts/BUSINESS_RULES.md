@@ -1,6 +1,15 @@
 # BUSINESS_RULES.md — PesquisaIA
-> Última atualização: 2026-06-19
-> Branch: feat/implementacao-completa-prd
+> Última atualização: 2026-06-21
+> Branch de trabalho atual: `feat/chat-respondente-ux` (base: `feat/duplicar-pesquisa`)
+
+---
+
+> [!CAUTION]
+> **ATENÇÃO — ARMADILHA DE BRANCHES:**
+> O branch `main` deste repositório contém um template antigo **React/Vite/TanStack** que **NÃO É** o projeto real.
+> **NUNCA** faça `git checkout main` nem crie novas branches a partir dele.
+> Todo o trabalho PHP está nas branches `feat/*` e `fix/*`, sendo `feat/duplicar-pesquisa` a linha principal mais atualizada.
+> Para criar uma nova feature, sempre use: `git checkout feat/duplicar-pesquisa && git checkout -b feat/nome-da-feature`
 
 ---
 
