@@ -5,3 +5,10 @@
 .lando/
 *.log
 .env
+
+# Arquivos temporários de desenvolvimento
+database/check_generated.php
+database/test_generator.php
+
+# Backlog (arquivo de planejamento local, não versionado)
+production_artifacts/backlog.md
