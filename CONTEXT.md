@@ -17,40 +17,28 @@ Este é um projeto **PHP 8.3 puro** com Lando. Não é React, não é Vite, não
 
 ---
 
-## 🚨 ARMADILHA CRÍTICA — Branches Git
+## 🌿 Fluxo de Branches
 
-```
-⛔ O branch `main` = Template React/Vite/TanStack LEGADO (sem .lando.yml)
-✅ O branch base real = feat/duplicar-pesquisa (PHP completo)
-```
-
-### Regra obrigatória para criar qualquer nova feature ou fix:
+O `main` é o **branch principal e estável**. Sempre crie novas branches a partir dele.
 
 ```bash
-# SEMPRE partir daqui:
-git checkout feat/duplicar-pesquisa
+# Criar nova feature
+git checkout main
 git checkout -b feat/nome-da-feature
+
+# Criar correção de bug
+git checkout main
+git checkout -b fix/nome-do-bug
 ```
 
-### Mapa de branches PHP (todas baseadas em feat/implementacao-completa-prd)
-
-| Branch | Descrição |
-|--------|-----------|
-| `feat/implementacao-completa-prd` | Base PHP — Fases 1–9 |
-| `feat/gerador-respostas` | +Gerador de respostas fictícias |
-| `feat/duplicar-pesquisa` | **+Duplicar pesquisa (BASE ATUAL)** |
-| `feat/chat-respondente-ux` | +Redesign UX do chat respondente |
-
----
-
-## 🔍 Como verificar se você está no branch certo
+### Como verificar que você está no ambiente correto
 
 ```bash
-# Deve mostrar .lando.yml, app/, public/, composer.json
-ls
+# A raiz do projeto deve conter:
+# .lando.yml, app/, public/, composer.json, README.md
 
-# NUNCA deve mostrar: package.json, vite.config.ts, bun.lock, src/
-# Se mostrar qualquer um desses → você está no main React. Mude de branch!
+# E NÃO deve conter:
+# package.json, vite.config.ts, bun.lock, src/
 ```
 
 ---

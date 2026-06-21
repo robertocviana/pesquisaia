@@ -4,37 +4,6 @@ Plataforma SaaS de pesquisas conversacionais criadas com IA (OpenAI GPT-4o).
 
 ---
 
-## ⚠️ LEIA ANTES DE QUALQUER COISA — Arquitetura de Branches
-
-> [!CAUTION]
-> O branch **`main`** deste repositório contém um template legado **React/Vite/TanStack** que **NÃO É** o projeto real e **NÃO TEM** `.lando.yml`. Ele existe apenas como ponto de partida histórico.
-
-### Regra de ouro para novos trabalhos:
-
-```bash
-# ✅ SEMPRE comece aqui — branch PHP mais atualizada
-git checkout feat/duplicar-pesquisa
-
-# ✅ Crie novas features a partir dela
-git checkout -b feat/nome-da-feature
-
-# ❌ NUNCA faça isso
-git checkout main
-```
-
-### Mapa de branches
-
-| Branch | Conteúdo | Status |
-|--------|----------|--------|
-| `main` | ❌ Template React/Vite/TanStack (legado) | Não usar |
-| `feat/implementacao-completa-prd` | ✅ PHP base — Fases 1–9 completas | Histórico |
-| `feat/migrate-to-php` | ✅ Migração inicial para PHP | Histórico |
-| `feat/gerador-respostas` | ✅ Gerador de respostas fictícias | Histórico |
-| `feat/duplicar-pesquisa` | ✅ **Base principal atual** | Usar como base |
-| `feat/chat-respondente-ux` | ✅ Redesign UX do chat | Em desenvolvimento |
-
----
-
 ## Stack Técnica
 
 | Camada | Tecnologia |
@@ -46,6 +15,26 @@ git checkout main
 | **Frontend** | Tailwind CSS CDN + Lucide Icons + Vanilla JS |
 | **Servidor local** | Lando (PHP 8.3, webroot: `/public`) |
 | **Configuração** | `.env` na raiz (não commitado, use `.env.example`) |
+
+---
+
+## Fluxo de Branches
+
+O `main` é o **branch principal e estável** do projeto. Todo desenvolvimento de features e correções é feito em branches separadas e integrado via merge ao `main`.
+
+```bash
+# ✅ Criar nova feature
+git checkout main
+git checkout -b feat/nome-da-feature
+
+# ✅ Criar correção de bug
+git checkout main
+git checkout -b fix/nome-do-bug
+
+# ✅ Ao finalizar, merge de volta para main
+git checkout main
+git merge feat/nome-da-feature
+```
 
 ---
 
@@ -85,7 +74,7 @@ pesquisaia/
 
 ---
 
-## Primeiros passos
+## Primeiros Passos
 
 ### Pré-requisitos
 
@@ -96,10 +85,9 @@ pesquisaia/
 ### Setup
 
 ```bash
-# 1. Clone e vá para a branch PHP correta
-git clone <repo>
+# 1. Clone e entre no projeto
+git clone https://github.com/robertocviana/pesquisaia.git
 cd pesquisaia
-git checkout feat/duplicar-pesquisa
 
 # 2. Configure variáveis de ambiente
 cp .env.example .env
@@ -118,13 +106,13 @@ lando php database/migrate.php --seed
 
 ---
 
-## Comandos úteis
+## Comandos Úteis
 
 ```bash
-lando info                      # Informações do ambiente
-lando php database/migrate.php  # Rodar migrations
-lando php database/migrate.php --seed  # Migrations + seeds
-lando logs -s appserver         # Logs do PHP
+lando info                              # Informações do ambiente
+lando php database/migrate.php          # Rodar migrations
+lando php database/migrate.php --seed   # Migrations + seeds
+lando logs -s appserver                 # Logs do PHP
 ```
 
 ---
