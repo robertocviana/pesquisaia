@@ -342,28 +342,22 @@ lando php database/migrate.php --seed   # Migrations + seeds
 
 ---
 
-## 14. Redesign UX — Chat do Respondente (One-Question-at-a-Time)
+## 14. Redesign UX — Chat do Respondente (One-Question-at-a-Time e Design Lovable)
 
-> **Implementado em:** 2026-06-21 — feat/chat-respondente-ux
-> **Objetivo:** Melhorar a experiência do respondente, especialmente em mobile, transformando o chat contínuo em fluxo de perguntas sequenciais estilo "typeform".
+> **Implementado em:** 2026-06-22 — feat/redesign-respondente-lovable
+> **Objetivo:** Substituir a área do respondente por um design moderno e elegante extraído do Lovable (welcome, chat, concluído), em CSS/JS puro sem Tailwind/Lucide externo.
 
-### Mudanças de Comportamento
+### Mudanças de Comportamento e Design
 
-| Antes | Depois |
-|-------|--------|
-| Histórico de chat visível (bolhas acumulam) | Uma pergunta por vez — foco total na resposta |
-| Progresso some ao rolar | Barra de progresso sempre visível no topo |
-| Botão de envio some quando teclado abre | Input + botão em zona fixa, nunca some |
-| Layout não considera teclado virtual iOS | `height: 100dvh` + `env(safe-area-inset-bottom)` |
+- **Intro (`/r/{slug}`)**: Design com gradientes suaves, estatísticas da pesquisa e CTA "Iniciar pesquisa".
+- **Chat (`/r/{slug}/chat`)**: Fluxo sequencial estilo "typeform" com barra de progresso no topo, transições animadas na troca de perguntas e botões dinâmicos de navegação. Sem o botão voltar, com foco total no avanço.
+- **Concluído (`/r/{slug}/concluido`)**: Feedback adicional simulado na UI local e animação de fade-in.
+- **Independência de dependências**: As views foram convertidas para HTML/CSS/JS standalone, deixando de incluir o `header.php` global que carrega Tailwind CDN e Lucide JS.
 
-### Layout de 3 Zonas Fixas
+### Arquivos Modificados
 
-1. **Header (topo fixo):** Nome da pesquisa + "Pergunta X de N" + barra de progresso integrada
-2. **Zona central:** Pergunta com tipografia grande (`clamp(1.25rem, 4vw, 2rem)`), animação slide/fade entre perguntas (350ms cubic-bezier)
-3. **Input zone (fundo fixo):** Textarea auto-resize + botão de enviar — nunca some no mobile
+- **`app/Views/respondent/intro.php`** — Layout de boas-vindas
+- **`app/Views/respondent/chat.php`** — Interface de chat do respondente
+- **`app/Views/respondent/concluido.php`** — Tela de conclusão
+- Sincronização AJAX com `/r/responder` e persistência no banco de dados mantidas integralmente.
 
-### Arquivo Modificado
-
-- **`app/Views/respondent/chat.php`** — substituição completa (HTML/CSS/JS)
-- Nenhum Controller, Model, rota ou banco de dados alterado
-- Compatibilidade retroativa total com AJAX `/r/responder` e sessão de respondentes
