@@ -7,7 +7,7 @@
     </a>
 
     <!-- Page Header -->
-    <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
             <h1 class="text-2xl font-semibold tracking-tight text-[#1e1b4b]"><?= htmlspecialchars($survey['name']) ?></h1>
             <p class="text-sm text-[#6b7280] mt-1">Criada em <?= date('d/m/Y', strtotime($survey['created_at'])) ?></p>
@@ -30,6 +30,28 @@
             <span class="w-1.5 h-1.5 rounded-full <?= $dot ?>"></span>
             <?= $survey['status'] ?>
         </span>
+    </div>
+
+    <!-- Barra de Ações -->
+    <div class="flex flex-wrap gap-2 mb-8 pb-6 border-b border-[#e5e7eb]">
+        <a href="/pesquisas/respostas?id=<?= $survey['id'] ?>"
+           class="inline-flex items-center gap-2 rounded-lg border border-[#e5e7eb] bg-white px-4 py-2.5 text-sm hover:bg-[#f3f4f6] transition">
+            <i data-lucide="messages-square" class="w-4 h-4"></i> Ver respostas
+        </a>
+        <a href="/pesquisas/relatorio?id=<?= $survey['id'] ?>"
+           class="inline-flex items-center gap-2 rounded-lg bg-[#6366f1] px-4 py-2.5 text-sm font-medium text-white shadow-[0_20px_40px_-20px_rgb(99_102_241_/_0.35)] hover:opacity-90 transition">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Ver relatório
+        </a>
+        <?php if ($survey['status'] === 'ativa'): ?>
+        <form method="POST" action="/pesquisas/encerrar" class="ml-auto"
+              onsubmit="return confirm('Encerrar esta pesquisa? Novos respondentes serão bloqueados.')">
+            <?= \App\Helpers\Csrf::field() ?>
+            <input type="hidden" name="survey_id" value="<?= (int) $survey['id'] ?>">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-lg border border-[#ef4444]/30 text-[#ef4444] bg-white px-4 py-2.5 text-sm hover:bg-[#ef4444]/5 transition">
+                <i data-lucide="lock" class="w-4 h-4"></i> Encerrar pesquisa
+            </button>
+        </form>
+        <?php endif; ?>
     </div>
 
     <!-- Cards superiores -->
@@ -129,27 +151,7 @@
         </div>
     </div>
 
-    <!-- Ações -->
-    <div class="flex flex-wrap gap-2">
-        <a href="/pesquisas/respostas?id=<?= $survey['id'] ?>"
-           class="inline-flex items-center gap-2 rounded-lg border border-[#e5e7eb] bg-white px-4 py-2.5 text-sm hover:bg-[#f3f4f6] transition">
-            <i data-lucide="messages-square" class="w-4 h-4"></i> Ver respostas
-        </a>
-        <a href="/pesquisas/relatorio?id=<?= $survey['id'] ?>"
-           class="inline-flex items-center gap-2 rounded-lg bg-[#6366f1] px-4 py-2.5 text-sm font-medium text-white shadow-[0_20px_40px_-20px_rgb(99_102_241_/_0.35)] hover:opacity-90 transition">
-            <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Ver relatório
-        </a>
-        <?php if ($survey['status'] === 'ativa'): ?>
-        <form method="POST" action="/pesquisas/encerrar" class="ml-auto"
-              onsubmit="return confirm('Encerrar esta pesquisa? Novos respondentes serão bloqueados.')">
-            <?= \App\Helpers\Csrf::field() ?>
-            <input type="hidden" name="survey_id" value="<?= (int) $survey['id'] ?>">
-            <button type="submit" class="inline-flex items-center gap-2 rounded-lg border border-[#ef4444]/30 text-[#ef4444] bg-white px-4 py-2.5 text-sm hover:bg-[#ef4444]/5 transition">
-                <i data-lucide="x-circle" class="w-4 h-4"></i> Encerrar pesquisa
-            </button>
-        </form>
-        <?php endif; ?>
-    </div>
+
 </div>
 
 <script>

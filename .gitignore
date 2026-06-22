@@ -5,6 +5,7 @@
 .lando/
 *.log
 .env
+.env.prod
 
 # Arquivos temporários de desenvolvimento
 database/check_generated.php
