@@ -389,4 +389,20 @@ lando php database/migrate.php --seed   # Migrations + seeds
 - **Alteração do Banco de Dados**: A coluna `deadline_at` na tabela `surveys` foi alterada de `DATE` para `DATETIME` para permitir precisão de hora e minuto.
 
 
+## 17. Planos e Limitações do Sistema (Trial vs Pro)
+
+> **Implementado em:** 2026-06-23 — feat/trial-plan
+> **Objetivo:** Adicionar diferenciação de planos (Trial gratuito vs Pro pago) com restrições e simulador de planos para testes.
+
+### Regras de Negócio
+- **Plano Padrão**: Todos os novos usuários cadastrados iniciam no plano `trial`.
+- **Limite de Pesquisas**: Usuários no plano `trial` só podem ter no máximo **3 pesquisas** (rascunho, ativa ou encerrada). Criação de novas pesquisas e duplicação são bloqueadas ao atingir o limite.
+- **Limite de Respostas**: Pesquisas de usuários no plano `trial` aceitam no máximo **10 respostas**. Quando a 10ª resposta é concluída, a pesquisa é fechada automaticamente (`checkAutoClose`). Links de participação em pesquisas com limite atingido retornam bloqueio HTTP 403 com tela explicativa amigável.
+- **Exportação de Dados**: A exportação de respostas e relatórios para PDF e CSV é bloqueada para usuários no plano `trial`, exibindo um alerta informativo.
+- **Relatório de IA**: Tanto usuários `trial` quanto `pro` podem gerar apenas **1 relatório** por pesquisa. A regeneração de relatórios é bloqueada para ambos os planos (o botão "Regenerar" é removido e a rota bloqueia segundas tentativas).
+- **Gerador de Respostas (Simulador)**: O número máximo de respostas geradas por chamada é limitado a **10 respondentes** para todos os usuários (Pro e Trial) para controlar os custos da API. Ambos usam a estratégia híbrida com IA.
+- **Simulador de Upgrade**: Na tela de configurações `/configuracoes`, há uma aba "Plano / Assinatura" onde o usuário pode alternar instantaneamente entre Trial e Pro para testar os fluxos e limites.
+
+
+
 

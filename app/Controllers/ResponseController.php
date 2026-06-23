@@ -63,8 +63,8 @@ class ResponseController
         }
 
         // Valida limites
-        if ($count < 1 || $count > 100) {
-            $_SESSION['flash_error'] = 'Você pode gerar entre 1 e 100 respostas por vez.';
+        if ($count < 1 || $count > 10) {
+            $_SESSION['flash_error'] = 'Você pode gerar entre 1 e 10 respostas por vez.';
             header('Location: /pesquisas/respostas?id=' . $surveyId);
             exit;
         }

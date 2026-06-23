@@ -34,11 +34,10 @@
                 
                 <span class="text-xs text-[#6b7280] font-medium pl-1.5 hidden sm:inline">Simular:</span>
                 <select name="count" class="rounded-md border border-[#e5e7eb] px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#6366f1] bg-white">
+                    <option value="1">1 resposta</option>
+                    <option value="3">3 respostas</option>
                     <option value="5">5 respostas</option>
-                    <option value="15" selected>15 respostas</option>
-                    <option value="30">30 respostas</option>
-                    <option value="50">50 respostas</option>
-                    <option value="100">100 respostas</option>
+                    <option value="10" selected>10 respostas</option>
                 </select>
                 
 

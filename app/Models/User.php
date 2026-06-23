@@ -9,22 +9,20 @@ use App\Database;
  */
 class User
 {
-    /** Busca um usuário pelo e-mail. */
     public static function findByEmail(string $email): ?array
     {
         $stmt = Database::pdo()->prepare(
-            'SELECT id, name, email, password_hash FROM users WHERE email = ? LIMIT 1'
+            'SELECT id, name, email, password_hash, plan FROM users WHERE email = ? LIMIT 1'
         );
         $stmt->execute([$email]);
         $row = $stmt->fetch();
         return $row ?: null;
     }
 
-    /** Busca um usuário pelo ID. */
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare(
-            'SELECT id, name, email FROM users WHERE id = ? LIMIT 1'
+            'SELECT id, name, email, plan FROM users WHERE id = ? LIMIT 1'
         );
         $stmt->execute([$id]);
         $row = $stmt->fetch();
@@ -73,5 +71,17 @@ class User
             'UPDATE users SET password_hash = ? WHERE id = ?'
         );
         $stmt->execute([$hash, $id]);
+    }
+
+    /** Atualiza o plano do usuário. */
+    public static function updatePlan(int $id, string $plan): void
+    {
+        if (!in_array($plan, ['trial', 'pro'], true)) {
+            throw new \InvalidArgumentException('Plano inválido.');
+        }
+        $stmt = Database::pdo()->prepare(
+            'UPDATE users SET plan = ? WHERE id = ?'
+        );
+        $stmt->execute([$plan, $id]);
     }
 }

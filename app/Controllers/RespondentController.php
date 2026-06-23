@@ -27,6 +27,25 @@ class RespondentController
             exit;
         }
 
+        // Verificar limite do plano Trial do criador da pesquisa
+        $owner = \App\Models\User::findById((int) $survey['user_id']);
+        $ownerPlan = $owner['plan'] ?? 'trial';
+
+        if ($ownerPlan === 'trial' && (int) $survey['response_count'] >= 10) {
+            http_response_code(403);
+            echo '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Limite Atingido — PesquisaIA</title></head>';
+            echo '<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;background-color:#f9fafb;margin:0;padding:2rem;">';
+            echo '<div style="max-w-md;text-align:center;background:white;padding:2.5rem;border-radius:1rem;border:1px solid #e5e7eb;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">';
+            echo '<div style="width:3.5rem;height:3.5rem;background:#fee2e2;color:#ef4444;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;">';
+            echo '<svg style="width:2rem;height:2rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+            echo '</div>';
+            echo '<h1 style="font-size:1.25rem;font-weight:600;color:#111827;margin-bottom:0.75rem;">Limite de Respostas Atingido</h1>';
+            echo '<p style="font-size:0.875rem;color:#4b5563;line-height:1.5;margin-bottom:1.5rem;">Esta pesquisa foi criada em uma conta gratuita (plano Trial) e já atingiu o limite máximo de 10 respostas permitidas.</p>';
+            echo '<span style="font-size:0.75rem;color:#9ca3af;">PesquisaIA</span>';
+            echo '</div></body></html>';
+            exit;
+        }
+
         $title = 'Participar — ' . $survey['name'];
         require BASE_PATH . '/app/Views/respondent/intro.php';
     }
@@ -39,6 +58,15 @@ class RespondentController
 
         if (!$survey) {
             header('Location: /');
+            exit;
+        }
+
+        // Verificar limite do plano Trial do criador da pesquisa
+        $owner = \App\Models\User::findById((int) $survey['user_id']);
+        $ownerPlan = $owner['plan'] ?? 'trial';
+
+        if ($ownerPlan === 'trial' && (int) $survey['response_count'] >= 10) {
+            header('Location: /r/' . $survey['public_slug']);
             exit;
         }
 

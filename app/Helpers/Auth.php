@@ -37,7 +37,7 @@ class Auth
         return self::isLoggedIn() ? (int) $_SESSION['user_id'] : null;
     }
 
-    /** Retorna o array com os dados do usuário logado (name, email). */
+    /** Retorna o array com os dados do usuário logado (name, email, plan). */
     public static function user(): ?array
     {
         if (!self::isLoggedIn()) return null;
@@ -45,6 +45,7 @@ class Auth
             'id'    => $_SESSION['user_id'],
             'name'  => $_SESSION['user_name']  ?? '',
             'email' => $_SESSION['user_email'] ?? '',
+            'plan'  => $_SESSION['user_plan']  ?? 'trial',
         ];
     }
 
@@ -55,6 +56,7 @@ class Auth
         $_SESSION['user_id']    = $user['id'];
         $_SESSION['user_name']  = $user['name'];
         $_SESSION['user_email'] = $user['email'];
+        $_SESSION['user_plan']  = $user['plan'] ?? 'trial';
     }
 
     /** Destrói a sessão do usuário. */

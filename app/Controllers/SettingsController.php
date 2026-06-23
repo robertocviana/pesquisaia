@@ -108,4 +108,30 @@ class SettingsController
         header('Location: /configuracoes');
         exit;
     }
+
+    public function handleUpdatePlan(): void
+    {
+        Auth::requireAuth();
+        \App\Helpers\Csrf::validate();
+
+        $userId = Auth::id();
+        $plan   = trim($_POST['plan'] ?? 'trial');
+
+        if (!in_array($plan, ['trial', 'pro'], true)) {
+            $_SESSION['flash_error'] = 'Plano inválido.';
+            header('Location: /configuracoes');
+            exit;
+        }
+
+        try {
+            User::updatePlan($userId, $plan);
+            $_SESSION['user_plan'] = $plan;
+            $_SESSION['flash_success'] = 'Plano atualizado com sucesso! (Simulação ativa)';
+        } catch (\Exception $e) {
+            $_SESSION['flash_error'] = 'Erro ao atualizar plano: ' . $e->getMessage();
+        }
+
+        header('Location: /configuracoes');
+        exit;
+    }
 }

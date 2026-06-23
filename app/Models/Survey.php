@@ -178,6 +178,13 @@ class Survey
             $shouldClose = true;
         }
 
+        // Se o dono for trial, fecha automaticamente com 10 respostas
+        $owner = User::findById((int) $survey['user_id']);
+        $ownerPlan = $owner['plan'] ?? 'trial';
+        if ($ownerPlan === 'trial' && (int) $survey['response_count'] >= 10) {
+            $shouldClose = true;
+        }
+
         if ($shouldClose) {
             self::closeById($id);
         }

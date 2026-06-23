@@ -35,9 +35,19 @@ class SurveyController
         Auth::requireAuth();
 
         $userId = Auth::id();
+        $user = Auth::user();
+        $userPlan = $user['plan'] ?? 'trial';
 
         // Se o usuário quer criar explicitamente uma nova pesquisa, limpa a sessão e cria
         if (isset($_GET['new'])) {
+            if ($userPlan === 'trial') {
+                $surveys = Survey::findByUser($userId);
+                if (count($surveys) >= 3) {
+                    $_SESSION['flash_error'] = 'Você atingiu o limite de 3 pesquisas permitidas no plano Trial. Faça upgrade para o Pro para criar mais.';
+                    header('Location: /pesquisas');
+                    exit;
+                }
+            }
             $_SESSION['current_survey_id'] = Survey::create($userId);
             header('Location: /pesquisas/nova');
             exit;
@@ -45,6 +55,14 @@ class SurveyController
 
         // Criar pesquisa em rascunho se não houver uma em andamento
         if (empty($_SESSION['current_survey_id'])) {
+            if ($userPlan === 'trial') {
+                $surveys = Survey::findByUser($userId);
+                if (count($surveys) >= 3) {
+                    $_SESSION['flash_error'] = 'Você atingiu o limite de 3 pesquisas permitidas no plano Trial. Faça upgrade para o Pro para criar mais.';
+                    header('Location: /pesquisas');
+                    exit;
+                }
+            }
             $_SESSION['current_survey_id'] = Survey::create($userId);
         }
 
@@ -53,6 +71,14 @@ class SurveyController
 
         // Se a pesquisa foi concluída/publicada, criar nova
         if (!$survey || $survey['status'] !== 'rascunho') {
+            if ($userPlan === 'trial') {
+                $surveys = Survey::findByUser($userId);
+                if (count($surveys) >= 3) {
+                    $_SESSION['flash_error'] = 'Você atingiu o limite de 3 pesquisas permitidas no plano Trial. Faça upgrade para o Pro para criar mais.';
+                    header('Location: /pesquisas');
+                    exit;
+                }
+            }
             $_SESSION['current_survey_id'] = Survey::create($userId);
             $surveyId = (int) $_SESSION['current_survey_id'];
             $survey   = Survey::findByIdForUser($surveyId, $userId);
@@ -241,6 +267,13 @@ class SurveyController
         $userId = Auth::id();
         $id     = (int) ($_POST['survey_id'] ?? 0);
 
+        $existing = Report::findBySurvey($id);
+        if ($existing) {
+            $_SESSION['flash_error'] = 'Esta pesquisa já possui um relatório gerado. Não é permitido regenerar relatórios.';
+            header('Location: /pesquisas/relatorio?id=' . $id);
+            exit;
+        }
+
         try {
             $service = new ReportService();
             $service->generate($id, $userId);
@@ -260,6 +293,16 @@ class SurveyController
         $userId  = Auth::id();
         $id      = (int) ($_GET['id'] ?? 0);
         $format  = $_GET['format'] ?? 'csv';
+
+        $user = Auth::user();
+        $userPlan = $user['plan'] ?? 'trial';
+
+        if ($userPlan === 'trial') {
+            $_SESSION['flash_error'] = 'A exportação de relatórios e dados é um recurso exclusivo do plano Pro. Faça upgrade para liberar!';
+            header('Location: /pesquisas/detalhe?id=' . $id);
+            exit;
+        }
+
         $service = new ExportService();
 
         if ($format === 'pdf') {
@@ -277,6 +320,18 @@ class SurveyController
 
         $userId = Auth::id();
         $id     = (int) ($_POST['survey_id'] ?? 0);
+
+        $user = Auth::user();
+        $userPlan = $user['plan'] ?? 'trial';
+
+        if ($userPlan === 'trial') {
+            $surveys = Survey::findByUser($userId);
+            if (count($surveys) >= 3) {
+                $_SESSION['flash_error'] = 'Você atingiu o limite de 3 pesquisas permitidas no plano Trial. Faça upgrade para o Pro para duplicar.';
+                header('Location: /pesquisas');
+                exit;
+            }
+        }
 
         try {
             $newId = Survey::duplicate($id, $userId);

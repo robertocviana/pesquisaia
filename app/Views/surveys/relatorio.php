@@ -19,12 +19,12 @@
             <p class="text-sm text-[#6b7280] mt-1">Análise consolidada — <?= htmlspecialchars($survey['name']) ?></p>
         </div>
         <div class="flex items-center gap-2">
-            <?php if ($survey['status'] === 'encerrada'): ?>
+            <?php if ($survey['status'] === 'encerrada' && !$report): ?>
             <form method="POST" action="/pesquisas/relatorio/gerar">
                 <?= \App\Helpers\Csrf::field() ?>
                 <input type="hidden" name="survey_id" value="<?= (int) $survey['id'] ?>">
                 <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3 py-2 text-sm hover:bg-[#f3f4f6] transition">
-                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> <?= $report ? 'Regenerar' : 'Gerar com IA' ?>
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> Gerar com IA
                 </button>
             </form>
             <?php endif; ?>

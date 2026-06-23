@@ -130,6 +130,10 @@ if ($uri === '/login') {
     $c = new \App\Controllers\SettingsController();
     $c->handleUpdateSeguranca();
 
+} elseif ($uri === '/configuracoes/plano' && $method === 'POST') {
+    $c = new \App\Controllers\SettingsController();
+    $c->handleUpdatePlan();
+
 // ─── Área Pública — Respondente (rotas dinâmicas /r/{slug}) ──────────────────
 } elseif (preg_match('#^/r/([a-f0-9]{16})$#', $uri, $m)) {
     $_GET['slug'] = $m[1];

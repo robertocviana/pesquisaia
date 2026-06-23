@@ -32,9 +32,28 @@ $nav = [
             </a>
         <?php endforeach; ?>
 
-        <div class="mt-auto border-t border-[#e5e7eb] pt-4">
+        <?php
+        $sidebarUser = $user ?? \App\Helpers\Auth::user();
+        if ($sidebarUser && ($sidebarUser['plan'] ?? 'trial') === 'trial'):
+        ?>
+        <div class="mt-auto mb-4 p-3.5 rounded-xl border border-indigo-100 bg-indigo-50/50 flex flex-col gap-2">
+            <div class="flex items-center gap-1.5 text-xs font-semibold text-[#4338ca]">
+                <i data-lucide="zap" class="w-3.5 h-3.5 fill-[#4338ca]"></i> Plano Trial (Gratuito)
+            </div>
+            <p class="text-[10.5px] text-[#6b7280] leading-normal">
+                Você está no plano de testes. Limite de 3 pesquisas e 10 respostas cada.
+            </p>
+            <a href="/configuracoes" onclick="localStorage.setItem('active_settings_tab', 'plano');" class="inline-flex items-center justify-center rounded-lg bg-[#6366f1] px-2.5 py-1.5 text-center text-xs font-medium text-white shadow-sm hover:opacity-90 transition">
+                Simular Upgrade
+            </a>
+        </div>
+        <?php else: ?>
+        <div class="mt-auto"></div>
+        <?php endif; ?>
+
+        <div class="border-t border-[#e5e7eb] pt-4">
             <?php
-            $sidebarUser = $user ?? \App\Helpers\Auth::user();
+            // já definido acima
             $initials    = '';
             if ($sidebarUser) {
                 $parts    = explode(' ', $sidebarUser['name']);
