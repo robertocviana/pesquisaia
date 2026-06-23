@@ -267,6 +267,13 @@ class SurveyController
         $userId = Auth::id();
         $id     = (int) ($_POST['survey_id'] ?? 0);
 
+        // Garante ownership antes de qualquer outra checagem
+        $survey = Survey::findByIdForUser($id, $userId);
+        if (!$survey) {
+            header('Location: /pesquisas');
+            exit;
+        }
+
         $existing = Report::findBySurvey($id);
         if ($existing) {
             $_SESSION['flash_error'] = 'Esta pesquisa já possui um relatório gerado. Não é permitido regenerar relatórios.';
