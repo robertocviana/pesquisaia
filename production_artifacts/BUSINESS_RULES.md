@@ -46,7 +46,7 @@ pesquisaia/
 │   ├── Controllers/              # HTTP Controllers (GET + POST)
 │   ├── Models/                   # Data Access Layer (PDO)
 │   ├── Services/                 # Lógica de negócio e IA
-│   ├── Helpers/                  # Auth, Csrf, MockData
+│   ├── Helpers/                  # Auth, Csrf, MockData, DateHelper
 │   └── Views/                    # PHP views (Tailwind CSS)
 ├── database/
 │   ├── migrations/*.sql          # 7 migrations
@@ -142,7 +142,7 @@ pesquisaia/
 ### FASE 7 — Encerramento
 - **Manual**: `POST /pesquisas/encerrar` com CSRF
 - **Por quantidade**: `Survey::checkAutoClose()` verifica `response_count >= goal_responses`
-- **Por data**: `Survey::checkAutoClose()` verifica `deadline_at <= date('Y-m-d')`
+- **Por data**: `Survey::checkAutoClose()` verifica `deadline_at <= DateHelper::todayString()` (fuso horário local)
 - Após encerramento: status = `encerrada`, novas respostas bloqueadas (`Survey::findBySlug()` retorna apenas `ativa`)
 
 ### FASE 8 — Relatório
@@ -360,4 +360,18 @@ lando php database/migrate.php --seed   # Migrations + seeds
 - **`app/Views/respondent/chat.php`** — Interface de chat do respondente
 - **`app/Views/respondent/concluido.php`** — Tela de conclusão
 - Sincronização AJAX com `/r/responder` e persistência no banco de dados mantidas integralmente.
+
+---
+
+## 15. Adequação de Fuso Horário (GMT-3 São Paulo e suporte dinâmico)
+
+> **Implementado em:** 2026-06-23 — feat/timezone-adequacao
+> **Objetivo:** Adequar a exibição de todas as datas e horas do sistema e regras de negócio de fechamento automático para respeitar o fuso de São Paulo (GMT-3), preparando o sistema para fusos customizados futuros.
+
+### Regras de Negócio
+- **Armazenamento consistente**: O banco de dados MySQL continua armazenando todos os campos de data e hora (`created_at`, `answered_at`, `generated_at`) no padrão UTC/servidor.
+- **Conversão sob demanda**: A exibição na interface do painel (detalhes, relatórios, respostas, exportações de PDF e CSV) é convertida para o fuso do usuário via `DateHelper::format()`.
+- **Fuso Padrão e Dinâmico**: O fuso horário padrão é `America/Sao_Paulo`. O sistema tenta obter o fuso horário da sessão do usuário (`$_SESSION['user_timezone']`), facilitando a customização por usuário no futuro.
+- **Fechamento Automático**: A verificação de expiração de pesquisas (`deadline_at`) compara a data com `DateHelper::todayString()`, garantindo que o encerramento por prazo final ocorra no dia correto conforme o fuso horário de São Paulo.
+
 

@@ -28,6 +28,7 @@
                 </button>
             </form>
             <?php endif; ?>
+            <?php if ($report): ?>
             <a href="/pesquisas/exportar?id=<?= (int) $survey['id'] ?>&format=pdf"
                class="inline-flex items-center gap-1.5 rounded-lg bg-[#6366f1] px-3 py-2 text-sm font-medium text-white shadow-[0_20px_40px_-20px_rgb(99_102_241_/_0.35)] hover:opacity-90 transition">
                 <i data-lucide="download" class="w-4 h-4"></i> Exportar PDF
@@ -36,6 +37,7 @@
                class="inline-flex items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-3 py-2 text-sm hover:bg-[#f3f4f6] transition">
                 <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> CSV
             </a>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -46,7 +48,7 @@
             <i data-lucide="sparkles" class="w-4 h-4 text-[#6366f1]"></i>
             <h2 class="font-semibold text-[#1e1b4b]">Resumo executivo</h2>
             <?php if ($report['generated_at']): ?>
-            <span class="ml-auto text-xs text-[#6b7280]">Gerado em <?= date('d/m/Y H:i', strtotime($report['generated_at'])) ?></span>
+            <span class="ml-auto text-xs text-[#6b7280]">Gerado em <?= \App\Helpers\DateHelper::format($report['generated_at'], 'd/m/Y H:i') ?></span>
             <?php endif; ?>
         </div>
         <div class="grid sm:grid-cols-2 gap-4 mb-4">

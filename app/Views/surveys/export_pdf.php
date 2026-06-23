@@ -42,7 +42,7 @@
             </div>
         </div>
         <div class="meta" style="text-align:right">
-            Gerado em <?= date('d/m/Y H:i') ?><br>
+            Gerado em <?= \App\Helpers\DateHelper::format('now', 'd/m/Y H:i') ?><br>
             Status: <?= ucfirst($survey['status']) ?>
         </div>
     </header>
@@ -52,7 +52,7 @@
         if (empty($rAnswers)) continue;
     ?>
     <div class="respondent">
-        <div class="rdate"><?= date('d/m/Y', strtotime($rsp['created_at'])) ?></div>
+        <div class="rdate"><?= \App\Helpers\DateHelper::format($rsp['created_at'], 'd/m/Y') ?></div>
         <div class="rname">
             <?= htmlspecialchars($rsp['name'] ?? 'Respondente #' . $rsp['id']) ?>
             <span class="badge <?= $rsp['status'] === 'concluida' ? 'badge-green' : 'badge-yellow' ?>">

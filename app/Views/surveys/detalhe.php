@@ -10,7 +10,7 @@
     <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
             <h1 class="text-2xl font-semibold tracking-tight text-[#1e1b4b]"><?= htmlspecialchars($survey['name']) ?></h1>
-            <p class="text-sm text-[#6b7280] mt-1">Criada em <?= date('d/m/Y', strtotime($survey['created_at'])) ?></p>
+            <p class="text-sm text-[#6b7280] mt-1">Criada em <?= \App\Helpers\DateHelper::format($survey['created_at'], 'd/m/Y') ?></p>
         </div>
         <?php
         $badgeStyles = [
@@ -71,8 +71,8 @@
             </div>
 
             <div class="mt-6 flex items-center gap-4">
-                <div class="w-32 h-32 rounded-lg border border-[#e5e7eb] bg-[#fafafa] flex items-center justify-center">
-                    <i data-lucide="qr-code" class="w-20 h-20 text-[#1e1b4b]" stroke-width="1.2"></i>
+                <div class="w-32 h-32 rounded-lg border border-[#e5e7eb] bg-[#fafafa] flex items-center justify-center p-1.5 overflow-hidden shrink-0">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=112x112&data=<?= urlencode($link) ?>" alt="QR Code" class="w-full h-full object-contain">
                 </div>
                 <div class="text-sm text-[#6b7280]">
                     <div class="font-medium text-[#1e1b4b] mb-1">QR Code</div>
@@ -125,7 +125,7 @@
                 <div>
                     <span class="block text-xs font-semibold uppercase tracking-wider text-[#6b7280]">Prazo Final</span>
                     <p class="text-sm text-[#1e1b4b] mt-1">
-                        <?= $survey['deadline_at'] ? date('d/m/Y', strtotime($survey['deadline_at'])) : '<em>Sem prazo definido</em>' ?>
+                        <?= $survey['deadline_at'] ? \App\Helpers\DateHelper::format($survey['deadline_at'], 'd/m/Y') : '<em>Sem prazo definido</em>' ?>
                     </p>
                 </div>
             </div>

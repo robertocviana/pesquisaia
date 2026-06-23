@@ -167,7 +167,7 @@ class Survey
             $shouldClose = true;
         }
 
-        if ($survey['deadline_at'] && $survey['deadline_at'] <= date('Y-m-d')) {
+        if ($survey['deadline_at'] && $survey['deadline_at'] <= \App\Helpers\DateHelper::todayString()) {
             $shouldClose = true;
         }
 

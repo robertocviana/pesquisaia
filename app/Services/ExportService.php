@@ -56,7 +56,7 @@ class ExportService
         foreach ($respondents as $rsp) {
             $row = [
                 $rsp['name'] ?? ('Respondente #' . $rsp['id']),
-                date('d/m/Y H:i', strtotime($rsp['created_at'])),
+                \App\Helpers\DateHelper::format($rsp['created_at'], 'd/m/Y H:i'),
                 $rsp['status'] === 'concluida' ? 'Concluída' : 'Em andamento',
             ];
             foreach ($questions as $q) {

@@ -123,14 +123,14 @@
                         : 'bg-[#eab308]/10 text-[#713f12]';
                     $statusLabel = $r['status'] === 'concluida' ? 'concluída' : 'em andamento';
                     // Timestamp em ms para o filtro de data via JS
-                    $timestampMs = strtotime($r['created_at']) * 1000;
+                    $timestampMs = \App\Helpers\DateHelper::timestamp($r['created_at']) * 1000;
                 ?>
                 <tr class="hover:bg-[#f3f4f6]/30 transition response-row"
                     data-name="<?= htmlspecialchars(strtolower($r['name'] ?? 'anônimo')) ?>"
                     data-status="<?= htmlspecialchars($r['status']) ?>"
                     data-ts="<?= $timestampMs ?>">
                     <td class="px-4 py-3 font-medium text-[#1e1b4b]"><?= htmlspecialchars($r['name'] ?? 'Anônimo') ?></td>
-                    <td class="px-4 py-3 text-[#6b7280]"><?= date('d/m/Y H:i', strtotime($r['created_at'])) ?></td>
+                    <td class="px-4 py-3 text-[#6b7280]"><?= \App\Helpers\DateHelper::format($r['created_at'], 'd/m/Y H:i') ?></td>
                     <td class="px-4 py-3">
                         <span class="inline-flex items-center rounded-full <?= $statusStyle ?> px-2 py-0.5 text-xs font-medium capitalize">
                             <?= $statusLabel ?>
