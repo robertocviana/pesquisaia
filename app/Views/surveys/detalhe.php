@@ -47,7 +47,7 @@
               onsubmit="return confirm('Encerrar esta pesquisa? Novos respondentes serão bloqueados.')">
             <?= \App\Helpers\Csrf::field() ?>
             <input type="hidden" name="survey_id" value="<?= (int) $survey['id'] ?>">
-            <button type="submit" class="inline-flex items-center gap-2 rounded-lg border border-[#ef4444]/30 text-[#ef4444] bg-white px-4 py-2.5 text-sm hover:bg-[#ef4444]/5 transition">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-lg border border-[#ef4444]/30 text-[#ef4444] bg-transparent px-4 py-2.5 text-sm hover:bg-[#ef4444]/5 dark:hover:bg-[#ef4444]/10 transition">
                 <i data-lucide="lock" class="w-4 h-4"></i> Encerrar pesquisa
             </button>
         </form>
@@ -147,7 +147,7 @@
             <?php else: ?>
                 <ul class="space-y-3">
                     <?php foreach ($questions as $index => $q): ?>
-                        <li class="flex items-start gap-3 rounded-lg border border-[#e5e7eb] p-3.5 bg-[#fafafa]/50">
+                        <li class="flex items-start gap-3 rounded-lg border border-[#e5e7eb] dark:border-slate-800/60 p-3.5 bg-[#fafafa]/50 dark:bg-slate-950/40">
                             <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#6366f1]/10 text-[#6366f1] text-xs font-semibold shrink-0 mt-0.5">
                                 <?= $index + 1 ?>
                             </span>
