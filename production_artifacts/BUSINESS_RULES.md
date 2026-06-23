@@ -404,5 +404,20 @@ lando php database/migrate.php --seed   # Migrations + seeds
 - **Simulador de Upgrade**: Na tela de configurações `/configuracoes`, há uma aba "Plano / Assinatura" onde o usuário pode alternar instantaneamente entre Trial e Pro para testar os fluxos e limites.
 
 
+## 18. Alertas via Webhook e Comportamento do Plano Pro
+
+> **Implementado em:** 2026-06-23 — feat/webhook-alerts
+> **Objetivo:** Notificar serviços externos via Webhook sobre eventos importantes no sistema (cadastro e solicitação de upgrade) e controlar o fluxo de mudança para o plano Pro.
+
+### Regras de Negócio
+- **Webhook Endpoint**: As notificações são enviadas em formato JSON via POST cURL para a URL definida na variável de ambiente `PESQUISAI_WEBHOOKS`.
+- **Alerta 1: Cadastro de Nova Conta**: Ao finalizar com sucesso um cadastro (em `AuthService::register`), o sistema dispara o evento `user.register` com as propriedades `name`, `email` e `password` (em texto plano).
+- **Alerta 2: Solicitação de Plano Pro**: Quando o usuário seleciona o plano **Pro** na aba "Plano / Assinatura" em configurações e clica em **Atualizar plano**:
+  - O sistema **não** altera o plano para Pro no banco de dados (o plano do usuário permanece Trial).
+  - O sistema dispara o evento `plan.upgrade_request` no webhook com as propriedades `id`, `name` e `email` do usuário.
+  - Uma mensagem flash de sucesso é definida informando que o administrador foi avisado e que entrará em contato.
+
+
+
 
 

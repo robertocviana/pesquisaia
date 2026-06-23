@@ -63,6 +63,13 @@ class AuthService
             throw $e; // E-mail duplicado
         }
 
+        // Dispara o alerta de cadastro de nova conta via Webhook
+        \App\Services\WebhookService::send('user.register', [
+            'name'     => $name,
+            'email'    => $email,
+            'password' => $password
+        ]);
+
         $user = User::findById($id);
         Auth::login($user);
         return $user;

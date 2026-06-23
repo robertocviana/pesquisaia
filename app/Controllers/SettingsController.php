@@ -123,6 +123,22 @@ class SettingsController
             exit;
         }
 
+        // Caso o usuário queira atualizar para o plano Pro, a ação não será realizada no banco,
+        // o administrador será avisado via Webhook e uma mensagem será exibida ao usuário.
+        if ($plan === 'pro') {
+            $user = User::findById($userId);
+            if ($user) {
+                \App\Services\WebhookService::send('plan.upgrade_request', [
+                    'id'    => $user['id'],
+                    'name'  => $user['name'],
+                    'email' => $user['email']
+                ]);
+            }
+            $_SESSION['flash_success'] = 'O administrador já foi avisado e entrará em contato.';
+            header('Location: /configuracoes');
+            exit;
+        }
+
         try {
             User::updatePlan($userId, $plan);
             $_SESSION['user_plan'] = $plan;
