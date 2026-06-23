@@ -27,11 +27,21 @@
         </a>
         <?php endforeach; ?>
         <div class="mt-auto border-t border-[#e5e7eb] pt-4">
+            <?php
+            $sidebarUser = $user ?? \App\Helpers\Auth::user();
+            $initials    = '';
+            if ($sidebarUser) {
+                $parts    = explode(' ', $sidebarUser['name']);
+                $initials = strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
+            }
+            ?>
             <div class="flex items-center gap-3 px-2">
-                <div class="w-9 h-9 rounded-full bg-[#eef2ff] flex items-center justify-center text-sm font-medium text-[#6366f1]">AC</div>
+                <div class="w-9 h-9 rounded-full bg-[#eef2ff] flex items-center justify-center text-sm font-medium text-[#6366f1]">
+                    <?= htmlspecialchars($initials) ?>
+                </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium truncate">Ana Costa</div>
-                    <div class="text-xs text-[#6b7280] truncate">ana@empresa.com</div>
+                    <div class="text-sm font-medium truncate"><?= htmlspecialchars($sidebarUser['name'] ?? '') ?></div>
+                    <div class="text-xs text-[#6b7280] truncate"><?= htmlspecialchars($sidebarUser['email'] ?? '') ?></div>
                 </div>
             </div>
         </div>

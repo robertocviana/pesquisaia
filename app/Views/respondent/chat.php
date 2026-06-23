@@ -602,7 +602,11 @@ if (total > 0) {
         pendingName = true;
         setTimeout(askNameQuestion, 400);
     } else {
-        setTimeout(() => askQuestion(step), 400);
+        if (step >= total) {
+            window.location.href = '/r/' + SURVEY_SLUG + '/concluido';
+        } else {
+            setTimeout(() => askQuestion(step), 400);
+        }
     }
 } else {
     revealQuestion('Esta pesquisa ainda não tem perguntas configuradas.', 'Atenção');

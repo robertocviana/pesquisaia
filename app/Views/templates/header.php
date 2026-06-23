@@ -8,6 +8,13 @@
     <meta name="description" content="<?= isset($description) ? htmlspecialchars($description) : 'Pesquisas inteligentes em minutos.' ?>">
     <meta name="csrf-token" content="<?= htmlspecialchars(\App\Helpers\Csrf::token(), ENT_QUOTES, 'UTF-8') ?>">
 
+    <!-- Dark Mode Initializer -->
+    <script>
+        if (localStorage.getItem('theme') === 'escuro') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
     <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +24,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -89,6 +97,57 @@
             color: #1e1b4b;
             font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
             -webkit-font-smoothing: antialiased;
+        }
+
+        /* Dark Mode Global Styles */
+        html.dark, html.dark body {
+            background-color: #0b0f19 !important;
+            color: #f3f4f6 !important;
+        }
+        html.dark * {
+            border-color: #1f2937 !important;
+        }
+        html.dark aside, 
+        html.dark .bg-white,
+        html.dark .bg-card,
+        html.dark .bg-\[\#fafafa\],
+        html.dark .hover\:bg-\[\#f3f4f6\]\/40:hover {
+            background-color: #111827 !important;
+            color: #f3f4f6 !important;
+        }
+        html.dark input,
+        html.dark textarea,
+        html.dark select,
+        html.dark .bg-\[\#f3f4f6\]\/40 {
+            background-color: #1f2937 !important;
+            color: #f3f4f6 !important;
+            border-color: #374151 !important;
+        }
+        html.dark .text-\[\#1e1b4b\] {
+            color: #f3f4f6 !important;
+        }
+        html.dark .text-\[\#6b7280\] {
+            color: #9ca3af !important;
+        }
+        html.dark .hover\:bg-\[\#f3f4f6\]\/40:hover {
+            background-color: rgba(31, 41, 55, 0.4) !important;
+        }
+        html.dark .bg-\[\#eef2ff\] {
+            background-color: rgba(99, 102, 241, 0.15) !important;
+            color: #a5b4fc !important;
+        }
+        html.dark .text-\[\#4338ca\] {
+            color: #a5b4fc !important;
+        }
+        html.dark .border-\[\#6366f1\] {
+            border-color: #6366f1 !important;
+        }
+        html.dark .hover\:bg-\[\#f3f4f6\]:hover {
+            background-color: rgba(99, 102, 241, 0.1) !important;
+            color: #a5b4fc !important;
+        }
+        html.dark .hover\:text-\[\#1e1b4b\]:hover {
+            color: #a5b4fc !important;
         }
     </style>
 </head>

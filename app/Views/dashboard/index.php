@@ -5,7 +5,7 @@
     <!-- Page Header -->
     <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-semibold tracking-tight text-[#1e1b4b]">Olá, Ana 👋</h1>
+            <h1 class="text-2xl font-semibold tracking-tight text-[#1e1b4b]">Olá, <?= htmlspecialchars(explode(' ', $user['name'] ?? 'Usuário')[0]) ?> 👋</h1>
             <p class="text-sm text-[#6b7280] mt-1">Aqui está um resumo das suas pesquisas.</p>
         </div>
         <a href="/pesquisas/nova?new=1"

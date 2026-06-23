@@ -122,6 +122,14 @@ if ($uri === '/login') {
     $c = new \App\Controllers\SettingsController();
     $c->index();
 
+} elseif ($uri === '/configuracoes/perfil' && $method === 'POST') {
+    $c = new \App\Controllers\SettingsController();
+    $c->handleUpdatePerfil();
+
+} elseif ($uri === '/configuracoes/seguranca' && $method === 'POST') {
+    $c = new \App\Controllers\SettingsController();
+    $c->handleUpdateSeguranca();
+
 // ─── Área Pública — Respondente (rotas dinâmicas /r/{slug}) ──────────────────
 } elseif (preg_match('#^/r/([a-f0-9]{16})$#', $uri, $m)) {
     $_GET['slug'] = $m[1];

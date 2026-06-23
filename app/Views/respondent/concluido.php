@@ -90,92 +90,6 @@
       font-size: 0.9375rem;
     }
 
-    /* ─── Optional feedback section ──────────────────────────────── */
-    .feedback-section {
-      margin-top: 2rem;
-      text-align: left;
-    }
-    label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--foreground);
-    }
-    textarea {
-      margin-top: 0.375rem;
-      width: 100%;
-      resize: none;
-      border-radius: var(--radius);
-      border: 1px solid var(--input);
-      background: var(--card);
-      padding: 0.625rem 0.75rem;
-      font-size: 0.875rem;
-      font-family: inherit;
-      color: var(--foreground);
-      outline: none;
-      transition: box-shadow 0.15s, border-color 0.15s;
-    }
-    textarea:focus {
-      border-color: var(--ring);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 18%, transparent);
-    }
-    textarea::placeholder { color: var(--muted-foreground); }
-
-    /* ─── Buttons ────────────────────────────────────────────────── */
-    .btn-primary {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      width: 100%;
-      margin-top: 0.75rem;
-      padding: 0.625rem 1.25rem;
-      background: var(--primary);
-      color: var(--primary-foreground);
-      font-size: 0.875rem;
-      font-weight: 500;
-      font-family: inherit;
-      border: none;
-      border-radius: var(--radius);
-      cursor: pointer;
-      box-shadow: var(--shadow-pop);
-      transition: opacity 0.15s;
-    }
-    .btn-primary:hover:not(:disabled) { opacity: 0.9; }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .btn-secondary {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      margin-top: 0.75rem;
-      padding: 0.625rem 1.25rem;
-      background: var(--card);
-      color: var(--foreground);
-      font-size: 0.875rem;
-      font-family: inherit;
-      border: 1px solid var(--input);
-      border-radius: var(--radius);
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .btn-secondary:hover { background: var(--muted); }
-
-    /* ─── Success toast ──────────────────────────────────────────── */
-    .toast-success {
-      display: none;
-      margin-top: 0.5rem;
-      background: var(--success-bg);
-      color: var(--success);
-      border-radius: var(--radius);
-      padding: 0.75rem;
-      font-size: 0.875rem;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .toast-success.visible { display: flex; }
-
     /* ─── Fade-in animation ──────────────────────────────────────── */
     @keyframes fadeSlideUp {
       from { opacity: 0; transform: translateY(16px); }
@@ -200,60 +114,11 @@
 
     <h1>Pesquisa concluída!</h1>
     <p class="description">
-      Muito obrigada por compartilhar sua opinião. Suas respostas são essenciais para que possamos
-      melhorar continuamente.
+      Muito obrigado por compartilhar sua opinião. Suas respostas foram enviadas com sucesso! Você já pode fechar esta janela.
     </p>
-
-    <!-- Optional feedback -->
-    <div class="feedback-section">
-      <label for="extra-feedback">Quer deixar um feedback adicional?</label>
-
-      <!-- Toast success (shown after sending) -->
-      <div class="toast-success" id="toast-success">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
-          <path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>
-        </svg>
-        Feedback enviado, obrigada!
-      </div>
-
-      <!-- Feedback form (hidden after sending) -->
-      <div id="feedback-form">
-        <textarea
-          id="extra-feedback"
-          rows="3"
-          placeholder="Opcional"
-        ></textarea>
-        <button class="btn-primary" id="btn-send" onclick="sendFeedback()" disabled>
-          Enviar feedback
-        </button>
-      </div>
-    </div>
-
-    <button class="btn-secondary" onclick="window.close()">Encerrar</button>
 
   </div>
 </div>
 
-<script>
-  var elTextarea = document.getElementById('extra-feedback');
-  var elBtn      = document.getElementById('btn-send');
-  var elForm     = document.getElementById('feedback-form');
-  var elToast    = document.getElementById('toast-success');
-
-  elTextarea.addEventListener('input', function() {
-    elBtn.disabled = !elTextarea.value.trim();
-  });
-
-  function sendFeedback() {
-    var text = elTextarea.value.trim();
-    if (!text) return;
-
-    // Apenas UI local simulada
-    elForm.style.display  = 'none';
-    elToast.classList.add('visible');
-  }
-</script>
 </body>
 </html>

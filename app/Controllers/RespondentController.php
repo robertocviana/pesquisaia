@@ -58,6 +58,12 @@ class RespondentController
         $questions  = Question::findBySurvey((int) $survey['id']);
         $answered   = Response::countByRespondent((int) $respondent['id']);
 
+        // Se o respondente já concluiu ou já respondeu todas as perguntas existentes, redireciona para a página de conclusão
+        if (count($questions) > 0 && ($respondent['status'] === 'concluida' || $answered >= count($questions))) {
+            header('Location: /r/' . $survey['public_slug'] . '/concluido');
+            exit;
+        }
+
         $title = $survey['name'];
         require BASE_PATH . '/app/Views/respondent/chat.php';
     }
