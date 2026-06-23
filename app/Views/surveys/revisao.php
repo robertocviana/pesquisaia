@@ -35,6 +35,25 @@
         </div>
     </section>
 
+    <!-- Critérios de encerramento -->
+    <section class="rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-[0_1px_2px_0_rgb(15_23_42_/_0.04)] mb-6">
+        <h2 class="font-semibold text-[#1e1b4b] mb-4">Critérios de encerramento (opcional)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="text-sm font-medium text-[#1e1b4b]">Meta de respostas</label>
+                <input type="number" id="survey-goal-responses-input" min="1" value="<?= htmlspecialchars($survey['goal_responses'] ?? '') ?>" placeholder="Ex: 100"
+                    class="mt-1.5 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6366f1]">
+                <p class="text-xs text-[#6b7280] mt-1">A pesquisa será encerrada automaticamente ao atingir este número.</p>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-[#1e1b4b]">Data e hora limite</label>
+                <input type="datetime-local" id="survey-deadline-input" value="<?= $survey['deadline_at'] ? \App\Helpers\DateHelper::format($survey['deadline_at'], 'Y-m-d\TH:i') : '' ?>"
+                    class="mt-1.5 w-full rounded-lg border border-[#e5e7eb] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6366f1]">
+                <p class="text-xs text-[#6b7280] mt-1">A pesquisa será encerrada automaticamente ao atingir este horário.</p>
+            </div>
+        </div>
+    </section>
+
     <!-- Perguntas -->
     <section class="rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-[0_1px_2px_0_rgb(15_23_42_/_0.04)] mb-6">
         <div class="flex items-center justify-between mb-4">
@@ -200,12 +219,16 @@ async function saveDraft(showFeedback = true) {
     const name = document.getElementById('survey-name-input').value.trim();
     const objective = document.getElementById('survey-objective-input').value.trim();
     const audience = document.getElementById('survey-audience-input').value.trim();
+    const goalResponses = document.getElementById('survey-goal-responses-input').value.trim();
+    const deadlineAt = document.getElementById('survey-deadline-input').value.trim();
     
     const formData = new FormData();
     formData.append('survey_id', <?= $survey['id'] ?>);
     formData.append('name', name);
     formData.append('objective', objective);
     formData.append('audience', audience);
+    formData.append('goal_responses', goalResponses);
+    formData.append('deadline_at', deadlineAt);
     formData.append('questions', JSON.stringify(questions));
     formData.append('_csrf', '<?= \App\Helpers\Csrf::token() ?>');
     

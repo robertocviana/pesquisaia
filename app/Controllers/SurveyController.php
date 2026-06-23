@@ -140,13 +140,16 @@ class SurveyController
             exit;
         }
 
+        $goalResponses = isset($_POST['goal_responses']) && $_POST['goal_responses'] !== '' ? (int)$_POST['goal_responses'] : null;
+        $deadlineAt    = isset($_POST['deadline_at']) && $_POST['deadline_at'] !== '' ? \App\Helpers\DateHelper::toUtc($_POST['deadline_at']) : null;
+
         // Atualizar campos gerais
         Survey::update($id, $userId, [
             'name'           => $_POST['name']           ?? $survey['name'],
             'objective'      => $_POST['objective']      ?? $survey['objective'],
             'audience'       => $_POST['audience']       ?? $survey['audience'],
-            'goal_responses' => $_POST['goal_responses'] ?? null,
-            'deadline_at'    => $_POST['deadline_at']    ?? null,
+            'goal_responses' => $goalResponses,
+            'deadline_at'    => $deadlineAt,
         ]);
 
         // Sincronizar perguntas

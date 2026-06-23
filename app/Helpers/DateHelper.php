@@ -68,4 +68,23 @@ class DateHelper
             return strtotime($dateTimeStr) ?: time();
         }
     }
+
+    /**
+     * Converte uma data/hora no fuso do usuário para UTC (formato Y-m-d H:i:s) para salvar no BD.
+     */
+    public static function toUtc(?string $localDateTimeStr): ?string
+    {
+        if (!$localDateTimeStr || trim($localDateTimeStr) === '') {
+            return null;
+        }
+
+        try {
+            $cleaned = str_replace('T', ' ', $localDateTimeStr);
+            $dt = new DateTime($cleaned, self::getTimezone());
+            $dt->setTimezone(new DateTimeZone('UTC'));
+            return $dt->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
 }

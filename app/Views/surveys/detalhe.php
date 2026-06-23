@@ -125,7 +125,7 @@
                 <div>
                     <span class="block text-xs font-semibold uppercase tracking-wider text-[#6b7280]">Prazo Final</span>
                     <p class="text-sm text-[#1e1b4b] mt-1">
-                        <?= $survey['deadline_at'] ? \App\Helpers\DateHelper::format($survey['deadline_at'], 'd/m/Y') : '<em>Sem prazo definido</em>' ?>
+                        <?= $survey['deadline_at'] ? \App\Helpers\DateHelper::format($survey['deadline_at'], 'd/m/Y H:i') : '<em>Sem prazo definido</em>' ?>
                     </p>
                 </div>
             </div>

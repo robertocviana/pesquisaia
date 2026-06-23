@@ -372,6 +372,21 @@ lando php database/migrate.php --seed   # Migrations + seeds
 - **Armazenamento consistente**: O banco de dados MySQL continua armazenando todos os campos de data e hora (`created_at`, `answered_at`, `generated_at`) no padrão UTC/servidor.
 - **Conversão sob demanda**: A exibição na interface do painel (detalhes, relatórios, respostas, exportações de PDF e CSV) é convertida para o fuso do usuário via `DateHelper::format()`.
 - **Fuso Padrão e Dinâmico**: O fuso horário padrão é `America/Sao_Paulo`. O sistema tenta obter o fuso horário da sessão do usuário (`$_SESSION['user_timezone']`), facilitando a customização por usuário no futuro.
-- **Fechamento Automático**: A verificação de expiração de pesquisas (`deadline_at`) compara a data com `DateHelper::todayString()`, garantindo que o encerramento por prazo final ocorra no dia correto conforme o fuso horário de São Paulo.
+- **Fechamento Automático**: A verificação de expiração de pesquisas (`deadline_at`) compara a data/hora com o horário atual UTC (`gmdate('Y-m-d H:i:s')`), garantindo que o encerramento ocorra exatamente no fuso/horário configurados.
+
+---
+
+## 16. Critérios de Encerramento na Revisão (Meta de Respostas e Data/Hora Limite)
+
+> **Implementado em:** 2026-06-23 — feat/criterios-encerramento-revisao
+> **Objetivo:** Permitir ao usuário visualizar e alterar os critérios de encerramento da pesquisa (meta de respostas e data/hora limite) na tela de revisão de rascunhos antes de publicá-la.
+
+### Regras de Negócio e Alterações
+- **Formulário de Revisão**: Exibe uma nova seção com inputs para "Meta de respostas" (tipo numérico, >= 1) e "Data e hora limite" (tipo `datetime-local`).
+- **Conversão de Timezone no Salvamento**: O input local de data e hora do usuário (ex: `2026-06-25T15:30`) é convertido para UTC (ex: `2026-06-25 18:30:00`) via `DateHelper::toUtc()` antes de ser salvo no banco.
+- **Conversão de Timezone na Exibição**: O valor em UTC do banco é convertido de volta para o fuso local do usuário usando `DateHelper::format($survey['deadline_at'], 'Y-m-d\TH:i')` ao preencher o campo na tela de revisão, e em `'d/m/Y H:i'` na tela de detalhes.
+- **Verificação de Expiração Precisa**: A função `Survey::checkAutoClose()` compara a data e hora limite UTC (`deadline_at`) diretamente com a data/hora atual em UTC (`gmdate('Y-m-d H:i:s')`), permitindo fechamento no minuto correto configurado pelo usuário.
+- **Alteração do Banco de Dados**: A coluna `deadline_at` na tabela `surveys` foi alterada de `DATE` para `DATETIME` para permitir precisão de hora e minuto.
+
 
 
