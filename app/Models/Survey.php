@@ -39,11 +39,18 @@ class Survey
     public static function findBySlug(string $slug): ?array
     {
         $stmt = Database::pdo()->prepare(
-            "SELECT * FROM surveys WHERE public_slug = ? AND status = 'ativa' LIMIT 1"
+            "SELECT * FROM surveys WHERE public_slug = ? LIMIT 1"
         );
         $stmt->execute([$slug]);
         $row = $stmt->fetch();
-        return $row ?: null;
+        if (!$row) return null;
+
+        if ($row['status'] === 'ativa') {
+            self::checkAutoClose((int) $row['id']);
+            $row = self::findById((int) $row['id']);
+        }
+
+        return ($row && $row['status'] === 'ativa') ? $row : null;
     }
 
     /** Busca por ID simples (sem checar user_id — usar com cuidado). */
