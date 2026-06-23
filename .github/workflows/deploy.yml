@@ -38,4 +38,4 @@ jobs:
             --exclude '.env' \
             -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
             ./ \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/visao360.oticas3r.com.br
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app.pesquisai.online
