@@ -140,9 +140,10 @@ pesquisaia/
 - Detalhe da resposta verifica `respondent['survey_id'] === survey['id']`
 
 ### FASE 7 — Encerramento
+- **Execução On-Demand**: Como não há cronjob rodando em segundo plano, a verificação de encerramento (`Survey::checkAutoClose()`) é executada sob demanda quando a pesquisa é carregada pelo respondente (ao carregar ou responder) ou pelo criador/usuário do painel (ao listar ou ver detalhes).
 - **Manual**: `POST /pesquisas/encerrar` com CSRF
 - **Por quantidade**: `Survey::checkAutoClose()` verifica `response_count >= goal_responses`
-- **Por data**: `Survey::checkAutoClose()` verifica `deadline_at <= DateHelper::todayString()` (fuso horário local)
+- **Por data**: `Survey::checkAutoClose()` compara a data e hora limite UTC (`deadline_at`) diretamente com a data/hora atual em UTC (`gmdate('Y-m-d H:i:s')`), permitindo fechamento no minuto correto configurado pelo usuário.
 - Após encerramento: status = `encerrada`, novas respostas bloqueadas (`Survey::findBySlug()` retorna apenas `ativa`)
 
 ### FASE 8 — Relatório

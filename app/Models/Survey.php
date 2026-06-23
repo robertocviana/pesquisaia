@@ -18,7 +18,22 @@ class Survey
             'SELECT * FROM surveys WHERE user_id = ? ORDER BY created_at DESC'
         );
         $stmt->execute([$userId]);
-        return $stmt->fetchAll();
+        $rows = $stmt->fetchAll();
+
+        $hasActive = false;
+        foreach ($rows as $row) {
+            if ($row['status'] === 'ativa') {
+                self::checkAutoClose((int) $row['id']);
+                $hasActive = true;
+            }
+        }
+
+        if ($hasActive) {
+            $stmt->execute([$userId]);
+            $rows = $stmt->fetchAll();
+        }
+
+        return $rows;
     }
 
     /**
@@ -32,6 +47,14 @@ class Survey
         );
         $stmt->execute([$id, $userId]);
         $row = $stmt->fetch();
+        if (!$row) return null;
+
+        if ($row['status'] === 'ativa') {
+            self::checkAutoClose((int) $row['id']);
+            $stmt->execute([$id, $userId]);
+            $row = $stmt->fetch();
+        }
+
         return $row ?: null;
     }
 
