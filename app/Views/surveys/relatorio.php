@@ -28,7 +28,7 @@
                 </button>
             </form>
             <?php endif; ?>
-            <?php if ($report): ?>
+            <?php if ($report && ($user['plan'] ?? 'trial') === 'pro'): ?>
             <a href="/pesquisas/exportar?id=<?= (int) $survey['id'] ?>&format=pdf"
                class="inline-flex items-center gap-1.5 rounded-lg bg-[#6366f1] px-3 py-2 text-sm font-medium text-white shadow-[0_20px_40px_-20px_rgb(99_102_241_/_0.35)] hover:opacity-90 transition">
                 <i data-lucide="download" class="w-4 h-4"></i> Exportar PDF
