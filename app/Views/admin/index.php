@@ -339,6 +339,7 @@ function renderSurveys(container, surveys) {
                     <th class="p-2.5">Nome da Pesquisa</th>
                     <th class="p-2.5 text-center">Status</th>
                     <th class="p-2.5 text-center">Respostas / Meta</th>
+                    <th class="p-2.5 text-center">Relatório IA</th>
                     <th class="p-2.5">Criada em</th>
                     <th class="p-2.5">Prazo Limite</th>
                 </tr>
@@ -353,6 +354,13 @@ function renderSurveys(container, surveys) {
             statusBadge = `<span class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[9px] font-medium text-red-700 border border-red-100">Encerrada</span>`;
         } else {
             statusBadge = `<span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[9px] font-medium text-gray-600 border border-gray-200">Rascunho</span>`;
+        }
+
+        let reportBadge = '';
+        if (s.has_report === 1) {
+            reportBadge = `<span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-medium text-emerald-700 border border-emerald-100">Gerado</span>`;
+        } else {
+            reportBadge = `<span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[9px] font-medium text-gray-400 border border-gray-200">Não gerado</span>`;
         }
 
         const goalStr = s.goal_responses ? s.goal_responses : '∞';
@@ -376,6 +384,7 @@ function renderSurveys(container, surveys) {
             <td class="p-2.5 font-medium text-gray-900 dark:text-white">${escapeHtml(s.name)}</td>
             <td class="p-2.5 text-center">${statusBadge}</td>
             <td class="p-2.5 text-center">${progressHtml}</td>
+            <td class="p-2.5 text-center">${reportBadge}</td>
             <td class="p-2.5 text-gray-500">${s.created_at_formatted}</td>
             <td class="p-2.5 text-gray-500">${escapeHtml(s.deadline_at_formatted)}</td>
         </tr>`;
@@ -383,6 +392,7 @@ function renderSurveys(container, surveys) {
 
     html += `</tbody></table></div>`;
     container.innerHTML = html;
+    lucide.createIcons();
 }
 
 function escapeHtml(str) {

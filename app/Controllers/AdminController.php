@@ -207,10 +207,12 @@ class AdminController
 
         try {
             $stmt = Database::pdo()->prepare(
-                "SELECT id, name, status, goal_responses, response_count, created_at, deadline_at 
-                 FROM surveys 
-                 WHERE user_id = ? 
-                 ORDER BY created_at DESC"
+                "SELECT s.id, s.name, s.status, s.goal_responses, s.response_count, s.created_at, s.deadline_at,
+                        CASE WHEN rep.id IS NOT NULL THEN 1 ELSE 0 END AS has_report
+                 FROM surveys s
+                 LEFT JOIN reports rep ON rep.survey_id = s.id
+                 WHERE s.user_id = ? 
+                 ORDER BY s.created_at DESC"
             );
             $stmt->execute([$userId]);
             $surveys = $stmt->fetchAll();
@@ -219,6 +221,7 @@ class AdminController
             foreach ($surveys as &$survey) {
                 $survey['created_at_formatted'] = DateHelper::format($survey['created_at'], 'd/m/Y H:i');
                 $survey['deadline_at_formatted'] = $survey['deadline_at'] ? DateHelper::format($survey['deadline_at'], 'd/m/Y H:i') : 'Sem prazo';
+                $survey['has_report'] = (int) $survey['has_report'];
                 
                 // Tradução amigável do status
                 $statusMap = [
