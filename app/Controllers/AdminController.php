@@ -30,6 +30,7 @@ class AdminController
         $proUsers = (int) Database::pdo()->query("SELECT COUNT(*) FROM users WHERE plan = 'pro'")->fetchColumn();
         $totalSurveys = (int) Database::pdo()->query("SELECT COUNT(*) FROM surveys")->fetchColumn();
         $totalAnswers = (int) Database::pdo()->query("SELECT COUNT(*) FROM responses")->fetchColumn();
+        $totalReports = (int) Database::pdo()->query("SELECT COUNT(*) FROM reports")->fetchColumn();
 
         // 2. Busca e Filtros
         $search = trim($_GET['search'] ?? '');
@@ -53,7 +54,8 @@ class AdminController
                     COALESCE(r.respondents_completed, 0) AS respondents_completed,
                     COALESCE(r.respondents_in_progress, 0) AS respondents_in_progress,
                     COALESCE(res.total_answers, 0) AS total_answers,
-                    res.last_response_at
+                    res.last_response_at,
+                    COALESCE(rep.total_reports, 0) AS total_reports
                 FROM users u
                 LEFT JOIN (
                     SELECT 
@@ -85,7 +87,15 @@ class AdminController
                     JOIN respondents r ON res.respondent_id = r.id
                     JOIN surveys s ON r.survey_id = s.id
                     GROUP BY s.user_id
-                ) res ON res.user_id = u.id";
+                ) res ON res.user_id = u.id
+                LEFT JOIN (
+                    SELECT 
+                        s.user_id,
+                        COUNT(rep.id) AS total_reports
+                    FROM reports rep
+                    JOIN surveys s ON rep.survey_id = s.id
+                    GROUP BY s.user_id
+                ) rep ON rep.user_id = u.id";
 
         $where = [];
         $params = [];

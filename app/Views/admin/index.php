@@ -31,7 +31,7 @@
     </div>
 
     <!-- Cards de Estatísticas Globais -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-8">
         
         <!-- Card 1: Usuários -->
         <div class="rounded-xl border border-[#e5e7eb] dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm flex items-center gap-4">
@@ -71,7 +71,19 @@
             </div>
         </div>
 
-        <!-- Card 4: Taxa de Resposta -->
+        <!-- Card 4: Relatórios IA -->
+        <div class="rounded-xl border border-[#e5e7eb] dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 text-[#6366f1] flex items-center justify-center shrink-0">
+                <i data-lucide="sparkles" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <span class="text-xs font-medium text-[#6b7280] dark:text-gray-400 block">Relatórios com IA</span>
+                <span class="text-2xl font-bold text-[#1e1b4b] dark:text-white block mt-0.5"><?= $totalReports ?></span>
+                <span class="text-[11px] text-gray-500 mt-1 block">Relatórios de IA gerados</span>
+            </div>
+        </div>
+
+        <!-- Card 5: Taxa de Resposta -->
         <div class="rounded-xl border border-[#e5e7eb] dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm flex items-center gap-4">
             <div class="w-12 h-12 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 text-[#6366f1] flex items-center justify-center shrink-0">
                 <i data-lucide="zap" class="w-6 h-6 fill-[#6366f1]/10"></i>
@@ -147,6 +159,7 @@
                         <th class="p-4 text-center">Papel</th>
                         <th class="p-4 text-center">Pesquisas</th>
                         <th class="p-4 text-center">Respondentes</th>
+                        <th class="p-4 text-center">Relatórios IA</th>
                         <th class="p-4 text-center">Respostas (Conversa)</th>
                         <th class="p-4">Última Atividade</th>
                     </tr>
@@ -154,7 +167,7 @@
                 <tbody class="divide-y divide-[#e5e7eb] dark:divide-gray-800 text-sm text-[#1e1b4b] dark:text-gray-200">
                     <?php if (empty($users)): ?>
                         <tr>
-                            <td colspan="8" class="p-8 text-center text-[#6b7280]">
+                            <td colspan="9" class="p-8 text-center text-[#6b7280]">
                                 Nenhum usuário encontrado com os filtros aplicados.
                             </td>
                         </tr>
@@ -218,6 +231,11 @@
                                     </div>
                                 </td>
 
+                                <!-- Relatórios gerados -->
+                                <td class="p-4 text-center font-semibold text-gray-800 dark:text-gray-300">
+                                    <?= $u['total_reports'] ?>
+                                </td>
+
                                 <!-- Respostas individuais -->
                                 <td class="p-4 text-center font-semibold text-gray-800 dark:text-gray-300">
                                     <?= $u['total_answers'] ?>
@@ -239,7 +257,7 @@
 
                             <!-- Linha de detalhamento das pesquisas do usuário (Inicialmente oculta) -->
                             <tr id="surveys-row-<?= $u['id'] ?>" class="hidden bg-gray-50/40 dark:bg-gray-950/10">
-                                <td colspan="8" class="p-4 border-t border-b border-[#e5e7eb] dark:border-gray-800">
+                                <td colspan="9" class="p-4 border-t border-b border-[#e5e7eb] dark:border-gray-800">
                                     <div class="pl-14 pr-4 py-2">
                                         <h4 class="font-semibold text-xs text-[#1e1b4b] dark:text-white uppercase tracking-wider mb-3 flex items-center gap-1.5">
                                             <i data-lucide="file-text" class="w-3.5 h-3.5 text-[#6366f1]"></i> Pesquisas Criadas por <?= htmlspecialchars($u['name']) ?>
