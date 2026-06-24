@@ -175,13 +175,13 @@
                                 <td class="p-4">
                                     <div class="font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($u['name']) ?></div>
                                     <div class="text-xs text-[#6b7280] dark:text-gray-400 mt-0.5"><?= htmlspecialchars($u['email']) ?></div>
-                                    <div class="text-[10px] text-gray-400 mt-1">Cadastro: <?= DateHelper::format($u['created_at'], 'd/m/Y H:i') ?></div>
+                                    <div class="text-[10px] text-gray-400 mt-1">Cadastro: <?= \App\Helpers\DateHelper::format($u['created_at'], 'd/m/Y H:i') ?></div>
                                 </td>
 
                                 <!-- Seletor de Plano -->
                                 <td class="p-4 text-center align-middle">
                                     <form action="/<?= $adminRoute ?>/update-plan" method="POST" class="inline-block" onchange="this.submit()">
-                                        <?= Csrf::field() ?>
+                                        <?= \App\Helpers\Csrf::field() ?>
                                         <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
                                         <select name="plan" class="text-xs font-semibold rounded px-2.5 py-1.5 cursor-pointer focus:outline-none ring-offset-2 focus:ring-2 focus:ring-[#6366f1] <?= $u['plan'] === 'pro' ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50' : 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900/50' ?>">
                                             <option value="trial" <?= $u['plan'] === 'trial' ? 'selected' : '' ?>>Trial</option>
@@ -193,7 +193,7 @@
                                 <!-- Seletor de Papel de Acesso -->
                                 <td class="p-4 text-center align-middle">
                                     <form action="/<?= $adminRoute ?>/update-role" method="POST" class="inline-block" onchange="confirmRoleChange(this, '<?= htmlspecialchars($u['name']) ?>', '<?= $u['role'] ?>')">
-                                        <?= Csrf::field() ?>
+                                        <?= \App\Helpers\Csrf::field() ?>
                                         <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
                                         <select name="role" class="text-xs font-semibold rounded px-2.5 py-1.5 cursor-pointer focus:outline-none ring-offset-2 focus:ring-2 focus:ring-[#6366f1] <?= $u['role'] === 'admin' ? 'bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-900/50' : 'bg-gray-50 dark:bg-gray-950/40 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800' ?>">
                                             <option value="user" <?= $u['role'] === 'user' ? 'selected' : '' ?>>Usuário</option>
@@ -227,10 +227,10 @@
                                 <td class="p-4">
                                     <?php if ($u['last_response_at']): ?>
                                         <div class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Resposta coletada</div>
-                                        <div class="text-[10px] text-gray-400 mt-0.5"><?= DateHelper::format($u['last_response_at'], 'd/m/Y H:i') ?></div>
+                                        <div class="text-[10px] text-gray-400 mt-0.5"><?= \App\Helpers\DateHelper::format($u['last_response_at'], 'd/m/Y H:i') ?></div>
                                     <?php elseif ($u['last_survey_at']): ?>
                                         <div class="text-xs text-[#6366f1] font-medium">Pesquisa criada</div>
-                                        <div class="text-[10px] text-gray-400 mt-0.5"><?= DateHelper::format($u['last_survey_at'], 'd/m/Y H:i') ?></div>
+                                        <div class="text-[10px] text-gray-400 mt-0.5"><?= \App\Helpers\DateHelper::format($u['last_survey_at'], 'd/m/Y H:i') ?></div>
                                     <?php else: ?>
                                         <span class="text-xs text-gray-400">Sem atividade</span>
                                     <?php endif; ?>
