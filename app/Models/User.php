@@ -12,7 +12,7 @@ class User
     public static function findByEmail(string $email): ?array
     {
         $stmt = Database::pdo()->prepare(
-            'SELECT id, name, email, password_hash, plan FROM users WHERE email = ? LIMIT 1'
+            'SELECT id, name, email, password_hash, plan, role FROM users WHERE email = ? LIMIT 1'
         );
         $stmt->execute([$email]);
         $row = $stmt->fetch();
@@ -22,7 +22,7 @@ class User
     public static function findById(int $id): ?array
     {
         $stmt = Database::pdo()->prepare(
-            'SELECT id, name, email, plan FROM users WHERE id = ? LIMIT 1'
+            'SELECT id, name, email, plan, role FROM users WHERE id = ? LIMIT 1'
         );
         $stmt->execute([$id]);
         $row = $stmt->fetch();
@@ -83,5 +83,17 @@ class User
             'UPDATE users SET plan = ? WHERE id = ?'
         );
         $stmt->execute([$plan, $id]);
+    }
+
+    /** Atualiza o papel do usuário. */
+    public static function updateRole(int $id, string $role): void
+    {
+        if (!in_array($role, ['user', 'admin'], true)) {
+            throw new \InvalidArgumentException('Papel inválido.');
+        }
+        $stmt = Database::pdo()->prepare(
+            'UPDATE users SET role = ? WHERE id = ?'
+        );
+        $stmt->execute([$role, $id]);
     }
 }

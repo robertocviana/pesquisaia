@@ -37,7 +37,7 @@ class Auth
         return self::isLoggedIn() ? (int) $_SESSION['user_id'] : null;
     }
 
-    /** Retorna o array com os dados do usuário logado (name, email, plan). */
+    /** Retorna o array com os dados do usuário logado (name, email, plan, role). */
     public static function user(): ?array
     {
         if (!self::isLoggedIn()) return null;
@@ -46,6 +46,7 @@ class Auth
             'name'  => $_SESSION['user_name']  ?? '',
             'email' => $_SESSION['user_email'] ?? '',
             'plan'  => $_SESSION['user_plan']  ?? 'trial',
+            'role'  => $_SESSION['user_role']  ?? 'user',
         ];
     }
 
@@ -57,6 +58,47 @@ class Auth
         $_SESSION['user_name']  = $user['name'];
         $_SESSION['user_email'] = $user['email'];
         $_SESSION['user_plan']  = $user['plan'] ?? 'trial';
+        $_SESSION['user_role']  = $user['role'] ?? 'user';
+    }
+
+    /** Verifica se o usuário logado é um administrador. */
+    public static function isAdmin(): bool
+    {
+        if (!self::isLoggedIn()) {
+            return false;
+        }
+
+        // 1. Verificação por e-mail configurado no .env (alta prioridade, bypass rápido)
+        $adminEmails = $_ENV['ADMIN_EMAILS'] ?? getenv('ADMIN_EMAILS') ?? '';
+        if (!empty($adminEmails)) {
+            $allowedEmails = array_map('trim', explode(',', $adminEmails));
+            $userEmail = $_SESSION['user_email'] ?? '';
+            if (in_array($userEmail, $allowedEmails, true)) {
+                return true;
+            }
+        }
+
+        // 2. Verificação pelo campo 'role' na sessão
+        $role = $_SESSION['user_role'] ?? 'user';
+        return $role === 'admin';
+    }
+
+    /** Bloqueia o acesso de não-administradores retornando 404 (para não revelar a rota secreta). */
+    public static function requireAdmin(): void
+    {
+        if (!self::isLoggedIn()) {
+            header('Location: /login');
+            exit;
+        }
+
+        if (!self::isAdmin()) {
+            http_response_code(404);
+            echo '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>404 — PesquisaIA</title></head>';
+            echo '<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;">';
+            echo '<div style="text-align:center"><h1 style="font-size:4rem;margin:0">404</h1><p>Página não encontrada.</p>';
+            echo '<a href="/dashboard" style="color:#6366f1">Voltar ao início</a></div></body></html>';
+            exit;
+        }
     }
 
     /** Destrói a sessão do usuário. */

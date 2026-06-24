@@ -417,6 +417,26 @@ lando php database/migrate.php --seed   # Migrations + seeds
   - O sistema dispara o evento `plan.upgrade_request` no webhook com as propriedades `id`, `name` e `email` do usuário.
   - Uma mensagem flash de sucesso é definida informando que o administrador foi avisado e que entrará em contato.
 
+---
+
+## 19. Painel Administrativo de Gerenciamento de Contas e Engajamento
+
+> **Implementado em:** 2026-06-24 — feat/admin-gerenciamento-contas
+> **Objetivo:** Permitir ao administrador gerenciar contas de usuários, alterar planos, promover/rebaixar permissões de acesso e visualizar métricas de engajamento e atividade.
+
+### Regras de Negócio e Segurança
+- **URL Dinâmica e Ofuscação**: A rota do painel é dinâmica e definida na variável de ambiente `ADMIN_ROUTE` (ex: `ADMIN_ROUTE=gerenciador-secreto-admin`).
+- **Segurança de Acesso**:
+  - Acesso restrito a usuários com `role = 'admin'` no banco ou e-mails listados na variável `ADMIN_EMAILS` no `.env` (ex: `ADMIN_EMAILS=dev@pesquisaia.com`).
+  - Usuários autenticados não administradores recebem **HTTP 404 (Página Não Encontrada)** ao acessar a rota administrativa, ocultando sua existência.
+  - Usuários não autenticados são redirecionados para `/login`.
+- **Prevenção de Autodespromoção**: Um administrador não pode remover o próprio privilégio de administrador através do painel.
+- **Visualização de Métricas**:
+  - Exibe contagem agregada de usuários, planos, pesquisas por status (ativa, rascunho, encerrada), respondentes (iniciados, concluídos) e respostas enviadas.
+  - Exibe a data da última atividade (pesquisa criada ou resposta coletada).
+  - Listagem de pesquisas individuais por usuário carregada dinamicamente via AJAX.
+- **Segurança das Operações**: Alterações de plano (`update-plan`) e papel (`update-role`) são protegidas por tokens CSRF.
+
 
 
 

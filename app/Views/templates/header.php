@@ -1,3 +1,12 @@
+<?php
+$appEnv = $_ENV['APP_ENV'] ?? null;
+$isLocal = ($appEnv === 'local' || $appEnv === 'development') || 
+           ($appEnv === null && isset($_SERVER['HTTP_HOST']) && (
+               str_contains($_SERVER['HTTP_HOST'], 'localhost') || 
+               str_contains($_SERVER['HTTP_HOST'], '127.0.0.1') || 
+               str_contains($_SERVER['HTTP_HOST'], '.lndo.site')
+           ));
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -19,6 +28,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Material Symbols Outlined -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -152,4 +164,11 @@
     </style>
 </head>
 
-<body>
+<body class="<?= $isLocal ? 'pt-7' : '' ?>">
+<?php if ($isLocal): ?>
+<div class="fixed top-0 left-0 w-full h-7 bg-red-600 text-white flex items-center justify-center font-bold text-[11px] uppercase tracking-widest z-[9999] shadow-md gap-2">
+    <span class="material-symbols-outlined text-[14px]">warning</span>
+    Ambiente de Desenvolvimento
+    <span class="material-symbols-outlined text-[14px]">warning</span>
+</div>
+<?php endif; ?>

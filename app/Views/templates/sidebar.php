@@ -6,6 +6,11 @@ $nav = [
     ['href' => '/pesquisas',   'label' => 'Minhas Pesquisas', 'icon' => 'file-text'],
     ['href' => '/configuracoes','label' => 'Configurações',   'icon' => 'settings'],
 ];
+
+if (\App\Helpers\Auth::isAdmin()) {
+    $adminRoute = $_ENV['ADMIN_ROUTE'] ?? getenv('ADMIN_ROUTE') ?: 'admin-controle';
+    $nav[] = ['href' => '/' . $adminRoute, 'label' => 'Painel Admin', 'icon' => 'shield'];
+}
 ?>
 <div class="min-h-screen flex bg-[#fafafa]">
     <!-- Sidebar desktop -->

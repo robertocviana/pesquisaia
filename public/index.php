@@ -134,6 +134,24 @@ if ($uri === '/login') {
     $c = new \App\Controllers\SettingsController();
     $c->handleUpdatePlan();
 
+// ─── Área Administrativa Secreta ─────────────────────────────────────────────
+} elseif (str_starts_with($uri, '/' . ($_ENV['ADMIN_ROUTE'] ?? getenv('ADMIN_ROUTE') ?: 'admin-controle'))) {
+    $adminRoute = $_ENV['ADMIN_ROUTE'] ?? getenv('ADMIN_ROUTE') ?: 'admin-controle';
+    $adminPrefix = '/' . $adminRoute;
+    $c = new \App\Controllers\AdminController();
+
+    if ($uri === $adminPrefix) {
+        $c->index();
+    } elseif ($uri === $adminPrefix . '/update-plan' && $method === 'POST') {
+        $c->handleUpdatePlan();
+    } elseif ($uri === $adminPrefix . '/update-role' && $method === 'POST') {
+        $c->handleUpdateRole();
+    } elseif ($uri === $adminPrefix . '/user-surveys') {
+        $c->userSurveys();
+    } else {
+        \App\Helpers\Auth::requireAdmin(); // Retorna 404
+    }
+
 // ─── Área Pública — Respondente (rotas dinâmicas /r/{slug}) ──────────────────
 } elseif (preg_match('#^/r/([a-f0-9]{16})$#', $uri, $m)) {
     $_GET['slug'] = $m[1];
